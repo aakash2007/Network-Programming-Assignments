@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <sys/msg.h>
 #include <sys/ipc.h>
+#include <sys/shm.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
@@ -41,13 +42,13 @@ MESSAGE decode_msg(char* en_msg){
 	return rcvd_msg;
 }
 
-typdef struct user_det{
+typedef struct user_det{
 	char username[20];
 	char password[20];
 	long user_id;
 } USER;
 
-
+typedef struct user_det* user_ptr;
 
 int main(){
 	const int SERVER_PORT = 6789;
@@ -65,6 +66,18 @@ int main(){
 	// char srv_ip[20];
 	// printf("Input the IP Address of Machine: ");
 	// scanf("%s", srv_ip);
+
+	// Array in Shared Memory for User Details
+	const int arr_sz = MAX_USERS*sizeof(USER);
+
+	int shmid = shmget(IPC_PRIVATE, arr_sz, 0666);
+	user_ptr user_arr_begin = (user_ptr)shmat(shmid, NULL, 0);
+
+	user_ptr newptr = user_arr_begin;
+	strcpy(newptr->username, "abcd");
+	strcpy(newptr->password, "a1234");
+	newptr->user_id = 5000;
+
 
 	// Message Queue for IPC
 	int msqid;
@@ -130,6 +143,10 @@ int main(){
 		// int len=0, maxlen=200;
 		// char buffer[maxlen];
 		// char *pbuffer = buffer;
+		USER u1 = (USER)(*user_arr_begin);
+		printf("%s\n", u1.username);
+		printf("%s\n", u1.password);
+		printf("%ld\n", u1.user_id);
 		printf("Connected with IP: %s\n", inet_ntoa(client_addr.sin_addr));
 
 		exit(0);
