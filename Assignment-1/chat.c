@@ -10,14 +10,18 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 
-struct my_msg
+#define MAX_USERS 20
+
+int users[MAX_USERS][3];	
+
+struct my_msg		// For Sending Over Network
 {
 	char msg_from[20];
 	char msg_to[20];
 	char msg_text[200];
 };
 
-struct mymsg_buf
+struct mymsg_buf	// For Message Queue
 {
 	long mtype;
 	char msg_from[20];
@@ -97,7 +101,11 @@ int main(){
 	}
 
 	if(child_pid == 0){
-
+		int n=0;
+		int len=0, maxlen=200;
+		char buffer[maxlen];
+		char *pbuffer = buffer;
+		printf("Connected with IP: %s\n", inet_ntoa(client_addr.sin_addr));
 	}
 
 	return 0;
