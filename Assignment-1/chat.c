@@ -20,6 +20,7 @@ struct my_msg		// For Sending Over Network
 	char msg_to[20];
 	char msg_text[200];
 };
+typedef struct my_msg MESSAGE;
 
 struct mymsg_buf	// For Message Queue
 {
@@ -27,6 +28,19 @@ struct mymsg_buf	// For Message Queue
 	char msg_from[20];
 	char msg_text[200];
 };
+
+MESSAGE decode_msg(char* en_msg){
+	char *pt;
+	MESSAGE rcvd_msg;
+	pt = strtok(en_msg, ",");
+	strcpy(rcvd_msg.msg_from, pt);
+	pt = strtok(NULL, ",");
+	strcpy(rcvd_msg.msg_to, pt);
+	pt = strtok(NULL, ",");
+	strcpy(rcvd_msg.msg_text, pt);
+
+	return rcvd_msg;
+}
 
 int main(){
 	const int SERVER_PORT = 6789;
@@ -108,6 +122,7 @@ int main(){
 		// char buffer[maxlen];
 		// char *pbuffer = buffer;
 		printf("Connected with IP: %s\n", inet_ntoa(client_addr.sin_addr));
+
 		exit(0);
 	}
 
