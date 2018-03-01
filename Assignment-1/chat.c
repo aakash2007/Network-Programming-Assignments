@@ -37,12 +37,12 @@ int main(){
 	// Open Stream Socket
 	int lis_sockfd;
 	if((lis_sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0){
-		perror("Listening Socket");
+		perror("listening socket");
 		exit(1);
 	}
 
 	if((bind(lis_sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr))) < 0){
-		perror("Socket Binding");
+		perror("bind");
 		exit(1);
 	}
 
@@ -50,7 +50,24 @@ int main(){
 	int client_addr_len = 0;
 
 	for(;;){
-		
+		int conn_sockfd;
+		if((conn_sockfd = accept(lis_sockfd, (struct sockaddr *)&client_addr, &client_addr_len)) < 0){
+			perror("accept");
+			exit(1);
+		}
+		pid_t child_pid;
+		if((child_pid = fork()) == 0){		// Child Process
+			close(lis_sockfd);
+			break;
+		}
+		else{
+			close(conn_sockfd);
+		}
 	}
 
-} 
+	if(child_pid == 0){
+
+	}
+
+	return 0;
+}
