@@ -1,9 +1,14 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/msg.h>
+#include <sys/ipc.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
 
 struct my_msg
 {
@@ -22,6 +27,20 @@ struct mymsg_buf
 int main(){
 	const int SERVER_PORT = 6789;
 
+	int fd;
+	struct ifreq ifr;
+	fd = socket(AF_INET, SOCK_DGRAM, 0);
+	ifr.ifr_addr.sa_family = AF_INET;
+	strncpy(ifr.ifr_name, "enp2s0", IFNAMSIZ-1);
+	ioctl(fd, SIOCGIFADDR, &ifr);
+	close(fd);
+
+	// printf("%s\n", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
+	
+	// char srv_ip[20];
+	// printf("Input the IP Address of Machine: ");
+	// scanf("%s", srv_ip);
+
 	// Message Queue for IPC
 	int msqid;
 	if((msqid = msgget(IPC_PRIVATE, 0666 | IPC_CREAT)) == -1){
@@ -33,6 +52,9 @@ int main(){
 	memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(SERVER_PORT);
+	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+	printf("Server Running on %s, Port: %d\n", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr), SERVER_PORT);
 
 	// Open Stream Socket
 	int lis_sockfd;
@@ -46,16 +68,25 @@ int main(){
 		exit(1);
 	}
 
+	int wait_size = 15;
+
+	if((listen(lis_sockfd, wait_size)) <  0){
+		perror("listen");
+		exit(1);
+	}
+
 	struct sockaddr_in client_addr;
 	int client_addr_len = 0;
 
+	printf("Server Ready to Accept Connections\n");
+
+	pid_t child_pid;
 	for(;;){
 		int conn_sockfd;
 		if((conn_sockfd = accept(lis_sockfd, (struct sockaddr *)&client_addr, &client_addr_len)) < 0){
 			perror("accept");
 			exit(1);
 		}
-		pid_t child_pid;
 		if((child_pid = fork()) == 0){		// Child Process
 			close(lis_sockfd);
 			break;
