@@ -5,10 +5,43 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+char username[10];
+
+struct my_msg		// For Sending Over Network
+{
+	// char msg_from[20];
+	char msg_to[20];
+	char msg_text[200];
+};
+typedef struct my_msg MESSAGE;
+
+char* encode_msg(MESSAGE out_msg){
+	char* en_msg = (char*)malloc(20*sizeof(char));
+	strcpy(en_msg, username);
+	strcat(en_msg, ",");
+	strcat(en_msg, out_msg.msg_to);
+	strcat(en_msg, ",");
+	strcat(en_msg, out_msg.msg_text);
+
+	return en_msg;
+}
+
 int main(){
 
-	const char* server_name = "172.17.2.55";
+	strcpy(username, "user0");
+	MESSAGE mms;
+	strcpy(mms.msg_to, "user1");
+	strcpy(mms.msg_text, "Hello All");
+
+	char *msg_to_send = encode_msg(mms);
+
+	// const char* server_name = "172.17.2.55";
+	const char* server_name = "192.168.43.55";
+	// char server_name[20];
 	const int server_port = 6789;
+
+	// printf("Enter Server IP Address: ");
+	// scanf("%s", server_name);
 
 	struct sockaddr_in server_addr;
 	memset(&server_addr, 0, sizeof(server_addr));
