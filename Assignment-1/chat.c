@@ -91,21 +91,24 @@ int main(){
 			perror("accept");
 			exit(1);
 		}
+		// printf("Forking...\n");
 		if((child_pid = fork()) == 0){		// Child Process
 			close(lis_sockfd);
-			break;
-		}
+			break;							// Child Process exits the loop
+		}									// Parent keeps listening
 		else{
 			close(conn_sockfd);
+			wait(NULL);
 		}
 	}
 
 	if(child_pid == 0){
-		int n=0;
-		int len=0, maxlen=200;
-		char buffer[maxlen];
-		char *pbuffer = buffer;
+		// int n=0;
+		// int len=0, maxlen=200;
+		// char buffer[maxlen];
+		// char *pbuffer = buffer;
 		printf("Connected with IP: %s\n", inet_ntoa(client_addr.sin_addr));
+		exit(0);
 	}
 
 	return 0;
