@@ -71,13 +71,8 @@ int main(){
 	const int arr_sz = MAX_USERS*sizeof(USER);
 
 	int shmid = shmget(IPC_PRIVATE, arr_sz, 0666);
+	int semid = semget(IPC_PRIVATE, 2, 0666);
 	user_ptr user_arr_begin = (user_ptr)shmat(shmid, NULL, 0);
-
-	user_ptr newptr = user_arr_begin;
-	strcpy(newptr->username, "abcd");
-	strcpy(newptr->password, "a1234");
-	newptr->user_id = 5000;
-
 
 	// Message Queue for IPC
 	int msqid;
@@ -115,12 +110,12 @@ int main(){
 
 	struct sockaddr_in client_addr;
 	int client_addr_len = 0;
+	int conn_sockfd;
 
 	printf("Server Ready to Accept Connections\n");
 
 	pid_t child_pid;
 	for(;;){
-		int conn_sockfd;
 		if((conn_sockfd = accept(lis_sockfd, (struct sockaddr *)&client_addr, &client_addr_len)) < 0){
 			perror("accept");
 			exit(1);
@@ -139,16 +134,23 @@ int main(){
 	}
 
 	if(child_pid == 0){
-		// int n=0;
-		// int len=0, maxlen=200;
-		// char buffer[maxlen];
-		// char *pbuffer = buffer;
-		USER u1 = (USER)(*user_arr_begin);
-		printf("%s\n", u1.username);
-		printf("%s\n", u1.password);
-		printf("%ld\n", u1.user_id);
+		int n=0;
+		int len=0, maxlen=200;
+		char buffer[maxlen];
+		char *pbuffer = buffer;
+		
 		printf("Connected with IP: %s\n", inet_ntoa(client_addr.sin_addr));
+		
+		while ((n = recv(conn_sockfd, pbuffer, maxlen, 0)) > 0) {
+			pbuffer += n;
+			maxlen -= n;
+			len += n;
 
+			printf("received: '%s'\n", buffer);
+
+			// echo received content back
+			send(conn_sockfd, buffer, len, 0);
+		}
 		exit(0);
 	}
 
