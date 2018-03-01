@@ -14,13 +14,12 @@
 
 int users[MAX_USERS][3];	
 
-struct my_msg		// For Sending Over Network
+typedef struct my_msg		// For Sending Over Network
 {
 	char msg_from[20];
 	char msg_to[20];
 	char msg_text[200];
-};
-typedef struct my_msg MESSAGE;
+} MESSAGE;
 
 struct mymsg_buf	// For Message Queue
 {
@@ -41,6 +40,14 @@ MESSAGE decode_msg(char* en_msg){
 
 	return rcvd_msg;
 }
+
+typdef struct user_det{
+	char username[20];
+	char password[20];
+	long user_id;
+} USER;
+
+
 
 int main(){
 	const int SERVER_PORT = 6789;
@@ -105,7 +112,9 @@ int main(){
 			perror("accept");
 			exit(1);
 		}
-		// printf("Forking...\n");
+
+
+
 		if((child_pid = fork()) == 0){		// Child Process
 			close(lis_sockfd);
 			break;							// Child Process exits the loop

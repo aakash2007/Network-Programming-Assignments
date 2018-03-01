@@ -7,16 +7,15 @@
 
 char username[10];
 
-struct my_msg		// For Sending Over Network
+typedef struct my_msg		// For Sending Over Network
 {
 	// char msg_from[20];
 	char msg_to[20];
 	char msg_text[200];
-};
-typedef struct my_msg MESSAGE;
+} MESSAGE;
 
 char* encode_msg(MESSAGE out_msg){
-	char* en_msg = (char*)malloc(20*sizeof(char));
+	char* en_msg = (char*)malloc(250*sizeof(char));
 	strcpy(en_msg, username);
 	strcat(en_msg, ",");
 	strcat(en_msg, out_msg.msg_to);
@@ -61,6 +60,12 @@ int main(){
 		perror("connect");
 		exit(1);
 	}
+
+	char password[20];
+	printf("Enter Username: ");
+	scanf("%s", username);
+	printf("Enter Password: ");
+	scanf("%s", password);
 
 	const char* data_to_send = "Sockets Networking API";
 	send(sock, data_to_send, strlen(data_to_send), 0);
