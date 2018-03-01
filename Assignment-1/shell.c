@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 #define EXIT_SUCCESS 0
 #ifndef EXIT_FAILURE
@@ -94,19 +95,20 @@ Command* shell_parse(char **args, int *isPipeline) {
 		while(args[pos] != NULL && args[pos][0] != '|' && args[pos][0] != '<' && args[pos][0] != '>' && args[pos][0] != ',' && args[pos][0] != ';')
 			cmds[cmd_no].args[arg_no++] = args[pos++];
 		if(args[pos] != NULL) {
-			if(args[pos][0] == '|')	isp = 0;
-			if(args[pos][0] == '<' || args[pos][0] == '>')	isr = 0;
+			if(args[pos][0] == '|')	isp = 1;
+			if(args[pos][0] == '<' || args[pos][0] == '>')	isr = 1;
 			cmds[++cmd_no].cmd = args[pos++];
 		}
 		cmd_no++;
 		arg_no = 0;
 	}
+	if(pos == 0)	return NULL;
 	if(isp == 1 && isr == 1) {
 		fprintf(stderr, "Shell: Cannot use pipe and redirection at same time.\n");
 		return NULL;
 	}
-	else if(isp = 1)	*isPipeline = 1;
-	else if(isr = 1)	*isPipeline = 0;
+	else if(isp == 1)	*isPipeline = 1;
+	else if(isr == 1)	*isPipeline = 0;
 	else	*isPipeline = 0;
 	return cmds;
 }
@@ -199,7 +201,7 @@ int shell_execute_pipeline(Command *cmds) {
 			dup2(cmds[i].read[0], STDIN_FILENO);
 			dup2(cmds[i].write[1], STDOUT_FILENO);
 			if(execvp(cmds[i].cmd, cmds[i].args) == -1) {
-				fprintf(stderr, "Shell: command not found: %s\n", cmds[i].cmd);
+				fprintf(stderr, "Shell: Command not found: %s\n", cmds[i].cmd);
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -226,6 +228,53 @@ int shell_execute_pipeline(Command *cmds) {
 	return 1;
 }
 
+int shell_execute_redirected(Command *cmds) {
+	if(cmds == NULL)	return 1;
+	int in = dup(STDIN_FILENO), out = dup(STDOUT_FILENO);
+	int input_fd = STDIN_FILENO, output_fd = STDOUT_FILENO;
+	for(int i = 0; i < BUFFER_SIZE && cmds[i].cmd != NULL; i++) {
+		if(strcmp(cmds[i].cmd, "<") == 0) {
+			if(cmds[i+1].cmd == NULL) {
+				fprintf(stderr, "Shell: Cannot Parse After '%s'\n", cmds[i].cmd);
+				return 1;
+			}
+			input_fd = open(cmds[++i].cmd, O_RDONLY);
+			if(input_fd == -1) {
+				printf("Shell: No such file or directory: %s\n", cmds[i].cmd);
+				return 1;
+			}
+		}
+		else if(strcmp(cmds[i].cmd, ">") == 0) {
+			if(cmds[i+1].cmd == NULL) {
+				fprintf(stderr, "Shell: Cannot Parse After '%s'\n", cmds[i].cmd);
+				return 1;
+			}
+			output_fd = fileno(fopen(cmds[++i].cmd, "w"));
+		}
+		else if(strcmp(cmds[i].cmd, ">>") == 0) {
+			if(cmds[i+1].cmd == NULL) {
+				fprintf(stderr, "Shell: Cannot Parse After '%s'\n", cmds[i].cmd);
+				return 1;
+			}
+			output_fd = fileno(fopen(cmds[++i].cmd, "a"));
+		}
+	}
+	int pid = fork();
+	if(pid == 0) {
+		dup2(input_fd, STDIN_FILENO);
+		dup2(output_fd, STDOUT_FILENO);
+		if(execvp(cmds[0].cmd, cmds[0].args) == -1) {
+			fprintf(stderr, "Shell: xxxCommand not found: %s\n", cmds[0].cmd);
+			exit(EXIT_FAILURE);
+		}
+	}
+	else {
+		wait(NULL);
+		dup2(in, STDIN_FILENO);
+		dup2(out, STDOUT_FILENO);
+	}
+}
+
 void shell_loop(void) {
 	char *line;
 	char **args;
@@ -236,7 +285,8 @@ void shell_loop(void) {
 		line = shell_read_line();
 		args = shell_split_line(line);
 		cmds = shell_parse(args, &isPipeline);
-		status = shell_execute_pipeline(cmds);
+		if(isPipeline)	status = shell_execute_pipeline(cmds);
+		else	status = shell_execute_redirected(cmds);
 	} while (status);
 }
 
