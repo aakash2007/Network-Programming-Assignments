@@ -27,15 +27,8 @@ char* encode_msg(MESSAGE out_msg){
 
 int main(){
 
-	strcpy(username, "user0");
-	MESSAGE mms;
-	strcpy(mms.msg_to, "user1");
-	strcpy(mms.msg_text, "Hello All");
-
-	char *msg_to_send = encode_msg(mms);
-
-	// const char* server_name = "172.17.2.55";
-	const char* server_name = "192.168.43.55";
+	const char* server_name = "172.17.2.55";
+	// const char* server_name = "192.168.43.55";
 	// char server_name[20];
 	const int server_port = 6789;
 
@@ -61,14 +54,24 @@ int main(){
 		exit(1);
 	}
 
-	char password[20];
-	printf("Enter Username: ");
-	scanf("%s", username);
-	printf("Enter Password: ");
-	scanf("%s", password);
+	int server_auth = 0;
+	char data_to_send[30];
+	char* password;
 
-	const char* data_to_send = "Sockets Networking API";
-	send(sock, data_to_send, strlen(data_to_send), 0);
+	// do{
+		printf("Enter Username: ");
+		scanf("%s", username);
+		password = getpass("Enter Password: ");
+
+		strcpy(data_to_send, username);
+		strcat(data_to_send, ",");
+		strcat(data_to_send, password);
+
+		printf("%s\n", data_to_send);
+
+		send(sock, data_to_send, strlen(data_to_send), 0);
+	// }while(server_auth != 1);
+
 
 	int n=0;
 	int len=0, maxlen=200;
