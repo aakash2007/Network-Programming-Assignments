@@ -63,6 +63,8 @@ int main(){
 		scanf("%s", username);
 		password = getpass("Enter Password: ");
 
+
+		// Generating Verification String
 		strcpy(data_to_send, username);
 		strcat(data_to_send, ",");
 		strcat(data_to_send, password);
@@ -78,14 +80,9 @@ int main(){
 	char buffer[maxlen];
 	char *pbuffer = buffer;
 
-	while((n = recv(sock, pbuffer, maxlen, 0)) > 0){
-		pbuffer += n;
-		maxlen -= n;
-		len += n;
+	read(sock, buffer, maxlen);
 
-		buffer[len] = '\0';
-		printf("Recieved Message: %s\n", buffer);
-	}
+	printf("Response from Server: %s\n", buffer);
 
 	close(sock);
 	return 0;

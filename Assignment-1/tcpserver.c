@@ -11,15 +11,13 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 
-#define MAX_USERS 20
-
-int users[MAX_USERS][3];	
+int MAX_USERS = 20;
 
 typedef struct my_msg		// For Sending Over Network
 {
 	char msg_from[20];
 	char msg_to[20];
-	char msg_text[200];
+	char msg_text[020];
 } MESSAGE;
 
 struct mymsg_buf	// For Message Queue
@@ -49,6 +47,11 @@ typedef struct user_det{
 } USER;
 
 typedef struct user_det* user_ptr;
+user_ptr user_arr_begin;
+
+int verify_user(char *vstr){
+
+}
 
 int main(){
 	const int SERVER_PORT = 6789;
@@ -72,7 +75,7 @@ int main(){
 
 	int shmid = shmget(IPC_PRIVATE, arr_sz, 0666);
 	int semid = semget(IPC_PRIVATE, 2, 0666);
-	user_ptr user_arr_begin = (user_ptr)shmat(shmid, NULL, 0);
+	user_arr_begin = (user_ptr)shmat(shmid, NULL, 0);
 
 	// Message Queue for IPC
 	int msqid;
@@ -121,8 +124,6 @@ int main(){
 			exit(1);
 		}
 
-
-
 		if((child_pid = fork()) == 0){		// Child Process
 			close(lis_sockfd);
 			break;							// Child Process exits the loop
@@ -141,16 +142,14 @@ int main(){
 		
 		printf("Connected with IP: %s\n", inet_ntoa(client_addr.sin_addr));
 		
-		while ((n = recv(conn_sockfd, pbuffer, maxlen, 0)) > 0) {
-			pbuffer += n;
-			maxlen -= n;
-			len += n;
-
-			printf("received: '%s'\n", buffer);
-
-			// echo received content back
-			send(conn_sockfd, buffer, len, 0);
+		read(conn_sockfd, buffer, maxlen);
+		printf("Recieved String: %s\n", buffer);
+		for (int i = 0; i < strlen(buffer); ++i)
+		{
+			buffer[i] = toupper(buffer[i]);
 		}
+		printf("Response String: %s\n", buffer);
+		send(conn_sockfd, buffer, strlen(buffer), 0);
 		exit(0);
 	}
 
