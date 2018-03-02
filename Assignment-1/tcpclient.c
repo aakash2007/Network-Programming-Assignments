@@ -5,7 +5,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-char username[10];
+char username[20];
 
 typedef struct my_msg		// For Sending Over Network
 {
@@ -55,7 +55,7 @@ int main(){
 	}
 
 	int server_auth = 0;
-	char data_to_send[30];
+	char data_to_send[100];
 	char* password;
 
 	// do{
@@ -75,10 +75,8 @@ int main(){
 	// }while(server_auth != 1);
 
 
-	int n=0;
 	int len=0, maxlen=200;
 	char buffer[maxlen];
-	char *pbuffer = buffer;
 
 	read(sock, buffer, maxlen);
 

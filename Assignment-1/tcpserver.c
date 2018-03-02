@@ -129,7 +129,7 @@ int main(){
 			break;							// Child Process exits the loop
 		}									// Parent keeps listening
 		else{
-			close(conn_sockfd);
+			// close(conn_sockfd);			// Causing Connection Issues
 			wait(NULL);
 		}
 	}
@@ -138,7 +138,6 @@ int main(){
 		int n=0;
 		int len=0, maxlen=200;
 		char buffer[maxlen];
-		char *pbuffer = buffer;
 		
 		printf("Connected with IP: %s\n", inet_ntoa(client_addr.sin_addr));
 		
