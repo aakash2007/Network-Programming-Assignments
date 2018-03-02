@@ -69,16 +69,17 @@ int main(){
 		strcat(data_to_send, ",");
 		strcat(data_to_send, password);
 
-		printf("%s\n", data_to_send);
+		printf("%s 	%ld\n", data_to_send, strlen(data_to_send));
 
 		send(sock, data_to_send, strlen(data_to_send), 0);
 	// }while(server_auth != 1);
 
 
-	int len=0, maxlen=200;
+	int maxlen = 100;
 	char buffer[maxlen];
+	char *pbuffer = buffer;
 
-	read(sock, buffer, maxlen);
+	recv(sock, pbuffer, maxlen, 0);
 
 	printf("Response from Server: %s\n", buffer);
 

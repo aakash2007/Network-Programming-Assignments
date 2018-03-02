@@ -42,15 +42,43 @@ MESSAGE decode_msg(char* en_msg){
 
 typedef struct user_det{
 	char username[20];
-	char password[20];
+	char password[50];
 	long user_id;
 } USER;
 
 typedef struct user_det* user_ptr;
+
 user_ptr user_arr_begin;
+int* registered_users;
 
-int verify_user(char *vstr){
+int verify_user(char *inp_str){
 
+	char vstr[50];
+	strcpy(vstr, inp_str);
+	char* pt;
+	char usrnm[20], pass[50];
+	pt = strtok(vstr, ",");
+	strcpy(usrnm, pt);
+	pt = strtok(NULL, ",");
+	strcpy(pass, pt);
+
+	user_ptr tmp = user_arr_begin;
+
+	for (int i = 0; i < registered_users; ++i)
+	{
+		if(strcmp(tmp->username, usrnm) == 0){		// User is Present
+			if(strcmp(tmp->password, pass) == 0){	// Passwords Matched
+				return 1;			// All OK, allow login
+			}
+			else{
+				return 2;			// User Exists, Password incorrect, retry
+			}
+		}
+
+		tmp++;
+	}
+
+	return 0;		// User doesn't exist, ask to create new.
 }
 
 int main(){
@@ -71,11 +99,36 @@ int main(){
 	// scanf("%s", srv_ip);
 
 	// Array in Shared Memory for User Details
-	const int arr_sz = MAX_USERS*sizeof(USER);
+	const int arr_sz = MAX_USERS*sizeof(USER) + sizeof(int);
+
+	// First 4 bytes to store no. of registered users and rest user_det array
 
 	int shmid = shmget(IPC_PRIVATE, arr_sz, 0666);
 	int semid = semget(IPC_PRIVATE, 2, 0666);
-	user_arr_begin = (user_ptr)shmat(shmid, NULL, 0);
+	void* shm_ptr = shmat(shmid, NULL, 0);
+	registered_users = (int*)shm_ptr;
+	*registered_users = 0;
+	user_arr_begin = (user_ptr)(shm_ptr + sizeof(int));
+
+
+
+
+	USER u1, u2;
+	strcpy(u1.username, "aakash");
+	strcpy(u1.password, "bajaj1234");
+	u1.user_id = 100;
+
+	strcpy(u2.username, "deepak");
+	strcpy(u2.password, "kar987kar");
+	u2.user_id = 200;
+
+	user_ptr ptr = user_arr_begin;
+	*ptr = u1;
+	ptr++;
+	*ptr = u2;
+	*registered_users = 2;
+
+
 
 	// Message Queue for IPC
 	int msqid;
@@ -115,7 +168,7 @@ int main(){
 	int client_addr_len = 0;
 	int conn_sockfd;
 
-	printf("Server Ready to Accept Connections\n");
+	printf("Server Ready to Accept Connections\n\n");
 
 	pid_t child_pid;
 	for(;;){
@@ -135,18 +188,20 @@ int main(){
 	}
 
 	if(child_pid == 0){
-		int n=0;
-		int len=0, maxlen=200;
-		char buffer[maxlen];
-		
 		printf("Connected with IP: %s\n", inet_ntoa(client_addr.sin_addr));
 		
-		read(conn_sockfd, buffer, maxlen);
+		int maxlen = 100;
+		char buffer[maxlen];
+		char *pbuffer = buffer;
+
+		recv(conn_sockfd, pbuffer, maxlen, 0);
+
+		printf("received: '%s'\n", buffer);
+
 		printf("Recieved String: %s\n", buffer);
-		for (int i = 0; i < strlen(buffer); ++i)
-		{
-			buffer[i] = toupper(buffer[i]);
-		}
+		printf("Size: %ld\n", strlen(buffer));
+		int resp = verify_user(buffer);
+		printf("Verification: %d\n", resp);
 		printf("Response String: %s\n", buffer);
 		send(conn_sockfd, buffer, strlen(buffer), 0);
 		exit(0);
