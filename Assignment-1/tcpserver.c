@@ -96,6 +96,8 @@ int verify_user(char *inp_str){
 }
 
 void create_new_user(char* usr_str){
+	char tstr[200];
+	strcpy(tstr, usr_str);
 	
 }
 
