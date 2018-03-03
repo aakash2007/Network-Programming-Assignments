@@ -42,6 +42,8 @@ MESSAGE decode_msg(char* en_msg){
 
 typedef struct user_det{
 	char username[20];
+	char first_name[50];
+	char last_name[50];
 	char password[50];
 	long user_id;
 } USER;
@@ -50,6 +52,18 @@ typedef struct user_det* user_ptr;
 
 user_ptr user_arr_begin;
 int* registered_users;
+
+void server_start_message(){
+	int fd;
+	struct ifreq ifr;
+	fd = socket(AF_INET, SOCK_DGRAM, 0);
+	ifr.ifr_addr.sa_family = AF_INET;
+	strncpy(ifr.ifr_name, "enp2s0", IFNAMSIZ-1);
+	ioctl(fd, SIOCGIFADDR, &ifr);
+	close(fd);
+
+	printf("Server Running on %s, Port: %d\n", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr), SERVER_PORT);
+}
 
 int verify_user(char *inp_str){
 
@@ -81,19 +95,40 @@ int verify_user(char *inp_str){
 	return 0;		// User doesn't exist, ask to create new.
 }
 
+void create_new_user(char* usr_str){
+	
+}
+
+void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
+	int maxlen = 100;
+	char buffer[maxlen];
+	char *pbuffer = buffer;
+
+	recv(conn_sockfd, pbuffer, maxlen, 0);
+
+	// printf("Recieved String: %s\n", buffer);
+	int resp = verify_user(buffer);
+	printf("Verification: %d\n", resp);
+
+	char res[3];
+	if(resp == 1){
+
+	}
+	else if(resp == 2){
+
+	}
+	else if(resp == 0){
+		strcpy(res, "0");
+		recv(conn_sockfd, pbuffer, maxlen, 0);
+		create_new_user(buffer);
+	}
+}
+
 int main(){
 	const int SERVER_PORT = 6789;
 
-	int fd;
-	struct ifreq ifr;
-	fd = socket(AF_INET, SOCK_DGRAM, 0);
-	ifr.ifr_addr.sa_family = AF_INET;
-	strncpy(ifr.ifr_name, "enp2s0", IFNAMSIZ-1);
-	ioctl(fd, SIOCGIFADDR, &ifr);
-	close(fd);
+	server_start_message();	
 
-	// printf("%s\n", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
-	
 	// char srv_ip[20];
 	// printf("Input the IP Address of Machine: ");
 	// scanf("%s", srv_ip);
@@ -105,6 +140,7 @@ int main(){
 
 	int shmid = shmget(IPC_PRIVATE, arr_sz, 0666);
 	int semid = semget(IPC_PRIVATE, 2, 0666);
+	
 	void* shm_ptr = shmat(shmid, NULL, 0);
 	registered_users = (int*)shm_ptr;
 	*registered_users = 0;
@@ -112,7 +148,7 @@ int main(){
 
 
 
-
+	// dummy users
 	USER u1, u2;
 	strcpy(u1.username, "aakash");
 	strcpy(u1.password, "bajaj1234");
@@ -143,7 +179,6 @@ int main(){
 	server_addr.sin_port = htons(SERVER_PORT);
 	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-	printf("Server Running on %s, Port: %d\n", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr), SERVER_PORT);
 
 	// Open Stream Socket
 	int lis_sockfd;
@@ -168,10 +203,10 @@ int main(){
 	int client_addr_len = 0;
 	int conn_sockfd;
 
-	printf("Server Ready to Accept Connections\n\n");
+	printf("Server Ready to Accept Connections....\n\n");
 
 	pid_t child_pid;
-	for(;;){
+	for(;;){		// to accept connections and create child processes
 		if((conn_sockfd = accept(lis_sockfd, (struct sockaddr *)&client_addr, &client_addr_len)) < 0){
 			perror("accept");
 			exit(1);
@@ -189,21 +224,7 @@ int main(){
 
 	if(child_pid == 0){
 		printf("Connected with IP: %s\n", inet_ntoa(client_addr.sin_addr));
-		
-		int maxlen = 100;
-		char buffer[maxlen];
-		char *pbuffer = buffer;
-
-		recv(conn_sockfd, pbuffer, maxlen, 0);
-
-		printf("received: '%s'\n", buffer);
-
-		printf("Recieved String: %s\n", buffer);
-		printf("Size: %ld\n", strlen(buffer));
-		int resp = verify_user(buffer);
-		printf("Verification: %d\n", resp);
-		printf("Response String: %s\n", buffer);
-		send(conn_sockfd, buffer, strlen(buffer), 0);
+		handle_client(conn_sockfd, client_addr);
 		exit(0);
 	}
 

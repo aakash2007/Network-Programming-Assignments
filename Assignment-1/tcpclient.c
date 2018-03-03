@@ -9,7 +9,7 @@ char username[20];
 
 typedef struct my_msg		// For Sending Over Network
 {
-	// char msg_from[20];
+	char msg_from[20];
 	char msg_to[20];
 	char msg_text[200];
 } MESSAGE;
