@@ -4,11 +4,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/wait.h>
+#include <signal.h>
 #define EXIT_SUCCESS 0
-#ifndef EXIT_FAILURE
-#define EXIT_FAILURE -1
-#endif
-#define BUFFER_SIZE 64
+#define BUFFER_SIZE 128
 #define SHELL_TOK_DELIM " \t\r\n\a"
 
 typedef struct command {
@@ -17,10 +15,19 @@ typedef struct command {
 	int read[2], write[2];
 } Command;
 
-char *shell_read_line(void) {
-	char *line = NULL;
-	ssize_t bufsize = 0; // have getline allocate a buffer for us
-	getline(&line, &bufsize, stdin);
+char *shell_read_line() {
+	int bufsize = BUFFER_SIZE;
+	char *line = (char*)malloc(sizeof(char)*bufsize);
+	int i = 0;
+	char ch;
+	while((ch = getchar()) != 10) {
+		if(i == bufsize) {
+			bufsize *= 2;
+			line = realloc(line, bufsize);
+		}
+		line[i++] = ch;
+		if(ch == -1)	exit(EXIT_SUCCESS);
+	}
 	return line;
 }
 
@@ -34,6 +41,10 @@ char **shell_split_line(char *line) {
 	}
 	int pos = 0, token_no = 0;
 	for(int i = 0; i < length; i++) {
+		if(token_no+5 >= bufsize) {
+			bufsize *= 2;
+			tokens = realloc(tokens, bufsize*sizeof(char*));
+		}
 		if(line[i] == ' ' || line[i] == '\t' || line[i] == '\n' || line[i] == '\r') {
 			if(pos != 0)	token_no++;
 			continue;
@@ -83,10 +94,15 @@ char **shell_split_line(char *line) {
 }
 
 Command* shell_parse(char **args, int *isPipeline) {
-	Command *cmds = (Command*)malloc(sizeof(Command)*BUFFER_SIZE);
+	int bufsize = BUFFER_SIZE;
+	Command *cmds = (Command*)malloc(sizeof(Command)*bufsize);
 	int cmd_no = 0, arg_no = 0, pos = 0;
 	int isp = 0, isr = 0;
 	while(args[pos] != NULL) {
+		if(cmd_no + 5 >= bufsize) {
+			bufsize *= 2;
+			cmds = realloc(cmds, sizeof(Command)*bufsize);
+		}
 		cmds[cmd_no].cmd = args[pos];
 		cmds[cmd_no].read[0] = -1;
 		cmds[cmd_no].read[1] = -1;
@@ -195,6 +211,7 @@ int shell_execute_pipeline(Command *cmds) {
 				write(out, buffer, size);
 			break;
 		}
+
 		if(cmds[i].write[1] == -1)	pipe(cmds[i].write);
 		pid = fork();
 		if(pid == 0) {
@@ -264,7 +281,7 @@ int shell_execute_redirected(Command *cmds) {
 		dup2(input_fd, STDIN_FILENO);
 		dup2(output_fd, STDOUT_FILENO);
 		if(execvp(cmds[0].cmd, cmds[0].args) == -1) {
-			fprintf(stderr, "Shell: xxxCommand not found: %s\n", cmds[0].cmd);
+			fprintf(stderr, "Shell: Command not found: %s\n", cmds[0].cmd);
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -275,13 +292,13 @@ int shell_execute_redirected(Command *cmds) {
 	}
 }
 
-void shell_loop(void) {
+void shell_loop() {
 	char *line;
 	char **args;
 	Command *cmds;
 	int status, isPipeline = 0;
 	do {
-		printf("Shell> ");
+		printf("Shell>");
 		line = shell_read_line();
 		args = shell_split_line(line);
 		cmds = shell_parse(args, &isPipeline);
@@ -290,7 +307,15 @@ void shell_loop(void) {
 	} while (status);
 }
 
+void interruptHandler(int signo) {
+	sleep(0.01);
+	printf("\n\rShell>");
+	fflush(stdout);
+	return;
+}
+
 int main(int argc, char **argv) {
-  shell_loop();
-  return EXIT_SUCCESS;
+	signal(SIGINT, interruptHandler);
+	shell_loop();
+	return EXIT_SUCCESS;
 }
