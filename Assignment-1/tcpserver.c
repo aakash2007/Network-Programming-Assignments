@@ -12,6 +12,7 @@
 #include <net/if.h>
 
 int MAX_USERS = 20;
+const int SERVER_PORT = 6789;
 
 typedef struct my_msg		// For Sending Over Network
 {
@@ -42,10 +43,12 @@ MESSAGE decode_msg(char* en_msg){
 
 typedef struct user_det{
 	char username[20];
+	pid_t child_pid;
 	char first_name[50];
 	char last_name[50];
 	char password[50];
 	long user_id;
+	int online_status;
 } USER;
 
 typedef struct user_det* user_ptr;
@@ -62,10 +65,10 @@ void server_start_message(){
 	ioctl(fd, SIOCGIFADDR, &ifr);
 	close(fd);
 
-	printf("Server Running on %s, Port: %d\n", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr), SERVER_PORT);
+	printf("Server Starting on %s, Port: %d\n", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr), SERVER_PORT);
 }
 
-int verify_user(char *inp_str){
+user_ptr verify_user(char *inp_str){
 
 	char vstr[50];
 	strcpy(vstr, inp_str);
@@ -82,17 +85,16 @@ int verify_user(char *inp_str){
 	{
 		if(strcmp(tmp->username, usrnm) == 0){		// User is Present
 			if(strcmp(tmp->password, pass) == 0){	// Passwords Matched
-				return 1;			// All OK, allow login
+				return tmp;			// All OK, allow login
 			}
 			else{
-				return 2;			// User Exists, Password incorrect, retry
+				return NULL;			// User Exists, Password incorrect, retry
 			}
 		}
 
 		tmp++;
 	}
-
-	return 0;		// User doesn't exist, ask to create new.
+	return NULL;		// User doesn't exist, ask to create new.
 }
 
 void create_new_user(char* usr_str){
@@ -107,27 +109,47 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 	char *pbuffer = buffer;
 
 	recv(conn_sockfd, pbuffer, maxlen, 0);
+	// read(conn_sockfd, pbuffer, maxlen);
+	printf("%s\n", buffer);
 
 	// printf("Recieved String: %s\n", buffer);
-	int resp = verify_user(buffer);
-	printf("Verification: %d\n", resp);
+	user_ptr conn_user = verify_user(buffer);
+	// printf("Verification: %d\n", resp);
 
-	char res[3];
-	if(resp == 1){
+	char resp[3];
+
+	if(conn_user != NULL){		// Verification OK
+		conn_user->child_pid = getpid();
+		conn_user->online_status = 1;
+
+		strcpy(resp, "1");
+		send(conn_sockfd, resp, 3, 0);
+
+		char welcome[100];
+		strcpy(welcome, "Welcome ");
+		strcat(welcome, conn_user->first_name);
+		strcat(welcome, "!");
+		printf("%s\n", welcome);
+		send(conn_sockfd, welcome, 200, 0);
+
+
+
+
 
 	}
-	else if(resp == 2){
-
-	}
-	else if(resp == 0){
-		strcpy(res, "0");
-		recv(conn_sockfd, pbuffer, maxlen, 0);
-		create_new_user(buffer);
-	}
+	// else if(resp == 2){		// Password Incorrect
+	// 	strcpy(res, "2");
+	// 	send(conn_sockfd, res, sizeof(res), 0);
+	// }
+	// else if(resp == 0){		// Create New User?
+	// 	strcpy(res, "0");
+	// 	send(conn_sockfd, res, sizeof(res), 0);
+	// 	recv(conn_sockfd, pbuffer, maxlen, 0);
+	// 	create_new_user(buffer);
+	// }
 }
 
 int main(){
-	const int SERVER_PORT = 6789;
 
 	server_start_message();	
 
@@ -154,6 +176,8 @@ int main(){
 	USER u1, u2;
 	strcpy(u1.username, "aakash");
 	strcpy(u1.password, "bajaj1234");
+	strcpy(u1.first_name, "Aakash");
+	strcpy(u1.last_name, "Bajaj");
 	u1.user_id = 100;
 
 	strcpy(u2.username, "deepak");

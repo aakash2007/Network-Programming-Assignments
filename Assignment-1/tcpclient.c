@@ -27,7 +27,7 @@ char* encode_msg(MESSAGE out_msg){
 
 int main(){
 
-	const char* server_name = "172.17.2.55";
+	const char* server_name = "127.0.0.1";
 	// const char* server_name = "192.168.43.55";
 	// char server_name[20];
 	const int server_port = 6789;
@@ -71,7 +71,8 @@ int main(){
 
 		printf("%s 	%ld\n", data_to_send, strlen(data_to_send));
 
-		send(sock, data_to_send, strlen(data_to_send), 0);
+		// write(sock, data_to_send, strlen(data_to_send+1))
+		send(sock, data_to_send, 100, 0);
 	// }while(server_auth != 1);
 
 
@@ -82,6 +83,13 @@ int main(){
 	recv(sock, pbuffer, maxlen, 0);
 
 	printf("Response from Server: %s\n", buffer);
+
+	char buffer2[maxlen];
+	char *pbuffer2 = buffer2;
+
+	recv(sock, pbuffer2, maxlen, 0);
+
+	printf("Response from Server: %s\n", buffer2);
 
 	close(sock);
 	return 0;
