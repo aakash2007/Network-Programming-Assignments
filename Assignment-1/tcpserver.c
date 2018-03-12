@@ -129,10 +129,10 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 		strcpy(welcome, "Welcome ");
 		strcat(welcome, conn_user->first_name);
 		strcat(welcome, "!");
-		printf("%s\n", welcome);
-		send(conn_sockfd, welcome, 200, 0);
+		printf("%s %d\n", welcome, strlen(welcome));
+		send(conn_sockfd, welcome, 100, 0);
 
-
+		
 
 
 

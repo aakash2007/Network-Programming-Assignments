@@ -89,7 +89,7 @@ int main(){
 
 	recv(sock, pbuffer2, maxlen, 0);
 
-	printf("Response from Server: %s\n", buffer2);
+	printf("Response from Server: %s  %ld\n", buffer2, strlen(buffer2));
 
 	close(sock);
 	return 0;
