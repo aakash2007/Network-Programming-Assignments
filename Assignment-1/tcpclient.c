@@ -114,17 +114,16 @@ int main(){
 
 		int scc = atoi(buffer);
 
-		if(scc = 1){
-			printf("User Successfully Created!\nConnect Again to Login.\n");
+		if(scc == 1){
+			printf("\nUser Successfully Created!\nConnect Again to Login.\n");
 			close(sock);
 			return 0;
 		}
 		else{
-			printf("Username Already Exists!\nPlease Try Again with different username.\n");
+			printf("\nUsername Already Exists!\nPlease Try Again with different username.\n");
 			close(sock);
 			return 0;
 		}
-
 
 	}
 	else if(md == 2){

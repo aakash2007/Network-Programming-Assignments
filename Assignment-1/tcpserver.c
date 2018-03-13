@@ -117,9 +117,43 @@ user_ptr verify_user(char *inp_str){
 int create_new_user(char* usr_str){
 	char tstr[200];
 	strcpy(tstr, usr_str);
-	printf("in: %s\n", tstr);
+	// printf("in: %s\n", tstr);
+	char usrnm[20], fname[50], lname[50], pass[50];
+	char* pt;
+	pt = strtok(tstr, ",");
+	strcpy(usrnm, pt);
+	pt = strtok(tstr, ",");
+	strcpy(pass, pt);
+	pt = strtok(tstr, ",");
+	strcpy(fname, pt);
+	pt = strtok(tstr, ",");
+	strcpy(lname, pt);
 
-	
+	user_ptr ptr = find_user(usrnm);
+
+	if(ptr != NULL){
+		return 2;
+	}
+
+	USER new_usr;
+	strcpy(new_usr.username, usrnm);
+	strcpy(new_usr.password, pass);
+	strcpy(new_usr.first_name, fname);
+	strcpy(new_usr.last_name, lname);
+
+	// *************semaphore ACCESSING RESOURCE  todo
+	ptr = user_arr_begin;
+
+	for (int i = 0; i < *registered_users; ++i)
+	{
+		ptr++;
+	}
+	*ptr = new_usr;
+	(*registered_users)++;
+	// *************semaphore RELEASING RESOURCE  todo
+
+
+	return 1;
 }
 
 void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
@@ -137,7 +171,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 		n = recv(conn_sockfd, pbuffer, maxlen, 0);	
 		buffer[n] = '\0';
 		int scc = create_new_user(buffer);
-		char scc_str;
+		char scc_str[10];
 		if(scc == 1){
 			strcpy(scc_str, "1");
 			send(conn_sockfd, scc_str, strlen(scc_str), 0);
@@ -149,7 +183,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 			sleep(0.01);
 		}
 		close(conn_sockfd);
-		return 0;
+		return;
 	}
 	else if(mode == 2){
 
@@ -305,6 +339,18 @@ int main(){
 	int conn_sockfd;
 
 	printf("Server Ready to Accept Connections....\n\n");
+
+	// **To test user creation
+
+	// pid_t temp;
+	// temp = fork();
+	// if(temp == 0){
+	// 	while(1){
+	// 		sleep(2);
+	// 		printf("%d \n", *registered_users);
+	// 	}
+	// }
+
 
 	pid_t child_pid;
 	for(;;){		// to accept connections and create child processes
