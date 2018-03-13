@@ -151,7 +151,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 
 			if(lis_child == 0){
 				while(1){
-					MESSAGE inc_msg = msgrcv()
+					// MESSAGE inc_msg = msgrcv();
 				}
 				exit(0);
 			}
