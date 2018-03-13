@@ -25,9 +25,19 @@ typedef struct my_msg		// For Sending Over Network
 struct mymsg_buf	// For Message Queue
 {
 	long mtype;
-	char msg_from[20];
+	char msg_from[50];
 	char msg_text[200];
 };
+
+typedef struct user_det{
+	char username[20];
+	pid_t child_pid;
+	char first_name[50];
+	char last_name[50];
+	char password[50];
+	long user_id;
+	int online_status;
+} USER;
 
 MESSAGE decode_msg(char* en_msg){
 	char *pt;
@@ -41,16 +51,6 @@ MESSAGE decode_msg(char* en_msg){
 
 	return rcvd_msg;
 }
-
-typedef struct user_det{
-	char username[20];
-	pid_t child_pid;
-	char first_name[50];
-	char last_name[50];
-	char password[50];
-	long user_id;
-	int online_status;
-} USER;
 
 typedef struct user_det* user_ptr;
 
@@ -230,15 +230,32 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 				n = recv(conn_sockfd, pbuffer, maxlen, 0);
 				buffer[n] = '\0';
 				oper = atoi(buffer);
+				printf("%d\n", oper);
 				if(oper == 1){
 					n = recv(conn_sockfd, pbuffer, maxlen, 0);
 					buffer[n] = '\0';
-					printf("a\n");
 					printf("%s %ld\n", buffer, strlen(buffer));
-					printf("b\n");
+					MESSAGE rcvd_msg = decode_msg(buffer);
+					printf("%s %s %s\n", rcvd_msg.msg_from, rcvd_msg.msg_to, rcvd_msg.msg_text);
+
+					user_ptr targ_usr = find_user(rcvd_msg.msg_to);
+
+					char msg_ack[10];
+					if(targ_usr != NULL){
+						strcpy(msg_ack, "1");
+						send(conn_sockfd, msg_ack, strlen(msg_ack), 0);
+						// sleep(0.01);
+						struct mymsg_buf q_msg;
+						
+					}
+					else{
+						strcpy(msg_ack, "2");
+						send(conn_sockfd, msg_ack, strlen(msg_ack), 0);
+						sleep(0.01);
+					}
 				}
 				else if(oper == 2){
-
+					
 				}
 				else if(oper == 3){
 

@@ -185,6 +185,7 @@ int main(){
 				}while(!(op == 1 || op == 2 || op == 3 || op == 4));
 
 				if(op == 1){
+					
 					strcpy(mode, "1");
 					send(sock, mode, strlen(mode), 0);
 					sleep(0.01);
@@ -196,17 +197,32 @@ int main(){
 					printf("Enter Message: ");
 					fgets(snd_msg.msg_text, 100, stdin);
 					fgets(snd_msg.msg_text, 100, stdin);
-					
+
 					char *msg_to_send = encode_msg(snd_msg);
-					printf("\nMessage Sent!\n", msg_to_send);
 					printf("%s %ld\n", msg_to_send, strlen(msg_to_send));
-					send(sock, msg_to_send, strlen(msg_to_send), 0);
+					send(sock, msg_to_send, strlen(msg_to_send)-1, 0);
+					sleep(0.01);
+
+					// printf("a\n");
+					// n = recv(sock, pbuffer, maxlen, 0);
+					// buffer[n] = '\0';
+					// printf("d %d\n", n);
+
+					// printf("ack: %s\n", buffer);
+
+					// int msg_ack = atoi(buffer);
+					// if(msg_ack == 1){
+						// printf("\nMessage Sent!\n");
+					// }
+					// else{
+					// 	printf("\nNo Such User.\n");
+					// }
 				}
 				else if(op == 2){
 					strcpy(mode, "2");
 					send(sock, mode, strlen(mode), 0);
 					sleep(0.01);
-
+					
 				}
 				else if(op == 3){
 					strcpy(mode, "3");
