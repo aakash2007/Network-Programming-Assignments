@@ -62,26 +62,40 @@ int main(){
 	char *pbuffer = buffer;
 	int n;
 
-	int mode;
+	int md = 1;
 	char inp[10];
 
-	printf("1. New User?\n");
-	printf("2. Existing User? Login\n");
-	printf("3. Exit\n");
+	do{
 
+		printf("1. New User?\n");
+		printf("2. Existing User? Login\n");
+		printf("3. Exit\n");
 
-	scanf("%s", inp);
-	mode = atoi(inp);
+		scanf("%s", inp);
+		md = atoi(inp);
 
-	printf("%d\n", strlen(inp));
+		if(!(md == 1 || md == 2 || md == 3)){
+			printf("Incorrect Choice. Please Try Again\n\n");
+		}
 
+		printf("%d\n", strlen(inp));
+	}while(!(md == 1 || md == 2 || md == 3));
 
-	
-	// do{
+	char mode[10];
+	if(md == 1){
+		strcpy(mode, "1");
+		send(sock, mode, strlen(mode), 0);
+		sleep(0.01);
+
+	}
+	else if(md == 2){
+		strcpy(mode, "2");
+		send(sock, mode, strlen(mode), 0);
+		sleep(0.01);
+
 		printf("Enter Username: ");
 		scanf("%s", username);
 		password = getpass("Enter Password: ");
-
 
 		// Generating Verification String
 		strcpy(data_to_send, username);
@@ -90,24 +104,24 @@ int main(){
 
 		printf("%s 	%ld\n", data_to_send, strlen(data_to_send));
 
-		// write(sock, data_to_send, strlen(data_to_send+1))
 		send(sock, data_to_send, 100, 0);
-	// }while(server_auth != 1);
+		n = recv(sock, pbuffer, maxlen, 0);
+		buffer[n] = '\0';
 
+		printf("Response from Server: %s\n", buffer);
 
+		char buffer2[maxlen];
+		char *pbuffer2 = buffer2;
 
-	n = recv(sock, pbuffer, maxlen, 0);
-	buffer[n] = '\0';
+		n = recv(sock, pbuffer2, maxlen, 0);
+		buffer2[n] = '\0';
 
-	printf("Response from Server: %s\n", buffer);
-
-	char buffer2[maxlen];
-	char *pbuffer2 = buffer2;
-
-	n = recv(sock, pbuffer2, maxlen, 0);
-	buffer2[n] = '\0';
-
-	printf("Response from Server: %s  %ld\n", buffer2, strlen(buffer2));
+		printf("Response from Server: %s  %ld\n", buffer2, strlen(buffer2));
+	}
+	else{
+		close(sock);
+		return 0;
+	}
 
 	close(sock);
 	return 0;
