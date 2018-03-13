@@ -231,7 +231,9 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 				buffer[n] = '\0';
 				oper = atoi(buffer);
 				if(oper == 1){
-
+					n = recv(conn_sockfd, pbuffer, maxlen, 0);
+					buffer[n] = '\0';
+					printf("%s\n", buffer);
 				}
 				else if(oper == 2){
 
@@ -241,8 +243,8 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 				}
 				else{
 					close(conn_sockfd);
-					kill(lis_child, SIGINT);
-					wait(NULL);
+					// kill(lis_child, SIGINT);
+					// wait(NULL);
 					exit(0);
 				}
 			}
@@ -294,13 +296,15 @@ int main(){
 	// dummy users
 	USER u1, u2;
 	strcpy(u1.username, "aakash");
-	strcpy(u1.password, "bajaj1234");
+	strcpy(u1.password, "bajaj");
 	strcpy(u1.first_name, "Aakash");
 	strcpy(u1.last_name, "Bajaj");
 	u1.user_id = 100;
 
 	strcpy(u2.username, "deepak");
-	strcpy(u2.password, "kar987kar");
+	strcpy(u2.password, "kar");
+	strcpy(u2.first_name, "Deepak");
+	strcpy(u2.last_name, "Kar");
 	u2.user_id = 200;
 
 	user_ptr ptr = user_arr_begin;
@@ -373,7 +377,7 @@ int main(){
 			break;							// Child Process exits the loop
 		}									// Parent keeps listening
 		else{
-			// close(conn_sockfd);			// Causing Connection Issues
+			close(conn_sockfd);			// Causing Connection Issues
 		}
 	}
 

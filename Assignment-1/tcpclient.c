@@ -16,7 +16,7 @@ typedef struct my_msg		// For Sending Over Network
 
 char* encode_msg(MESSAGE out_msg){
 	char* en_msg = (char*)malloc(250*sizeof(char));
-	strcpy(en_msg, username);
+	strcpy(en_msg, out_msg.msg_from);
 	strcat(en_msg, ",");
 	strcat(en_msg, out_msg.msg_to);
 	strcat(en_msg, ",");
@@ -132,7 +132,7 @@ int main(){
 		send(sock, mode, strlen(mode), 0);
 		sleep(0.01);
 
-		printf("Enter Username: ");
+		printf("\nEnter Username: ");
 		scanf("%s", username);
 		password = getpass("Enter Password: ");
 		// Generating Verification String
@@ -164,45 +164,60 @@ int main(){
 				exit(0);
 			}
 
-			int op;
-			do{
-				printf("What would you like to do?\n");
-				printf("1. Send a Private Message\n");
-				printf("2. Send a Broadcast Message\n");
-				printf("3. Get Status of Other Users\n");
-				printf("4. Exit\n");
-				printf("Select an option: ");
+			while(1){
 
-				scanf("%s", inp);
-				op = atoi(inp);
+				int op;
+				do{
+					printf("\nWhat would you like to do?\n");
+					printf("1. Send a Private Message\n");
+					printf("2. Send a Broadcast Message\n");
+					printf("3. Get Status of Other Users\n");
+					printf("4. Exit\n");
+					printf("Select an option: ");
 
-				if(!(op == 1 || op == 2 || op == 3 || op == 4)){
-					printf("Incorrect Choice. Please Try Again\n\n");
+					scanf("%s", inp);
+					op = atoi(inp);
+
+					if(!(op == 1 || op == 2 || op == 3 || op == 4)){
+						printf("Incorrect Choice. Please Try Again\n\n");
+					}
+				}while(!(op == 1 || op == 2 || op == 3 || op == 4));
+
+				if(op == 1){
+					strcpy(mode, "1");
+					send(sock, mode, strlen(mode), 0);
+					sleep(0.01);
+
+					MESSAGE snd_msg;
+					strcpy(snd_msg.msg_from, username);
+					printf("\nSend To: ");
+					scanf("%s", snd_msg.msg_to);
+					printf("Enter Message: ");
+					fgets(snd_msg.msg_text, 100, stdin);
+					fgets(snd_msg.msg_text, 100, stdin);
+
+					char *msg_to_send = encode_msg(snd_msg);
+					printf("\nMessage Sent!\n", msg_to_send);
+					printf("%s\n", msg_to_send);
+					send(sock, msg_to_send, strlen(msg_to_send), 0);
 				}
-			}while(!(op == 1 || op == 2 || op == 3 || op == 4));
+				else if(op == 2){
+					strcpy(mode, "2");
+					send(sock, mode, strlen(mode), 0);
+					sleep(0.01);
 
-			if(op == 1){
-				strcpy(mode, "1");
-				send(sock, mode, strlen(mode), 0);
-				sleep(0.01);
+				}
+				else if(op == 3){
+					strcpy(mode, "3");
+					send(sock, mode, strlen(mode), 0);
+					sleep(0.01);
 
-			}
-			else if(op == 2){
-				strcpy(mode, "2");
-				send(sock, mode, strlen(mode), 0);
-				sleep(0.01);
-
-			}
-			else if(op == 3){
-				strcpy(mode, "3");
-				send(sock, mode, strlen(mode), 0);
-				sleep(0.01);
-
-			}
-			else if(op == 4){
-				printf("\nGoodbye!\n");
-				close(sock);
-				return 0;	
+				}
+				else if(op == 4){
+					printf("\nGoodbye!\n");
+					close(sock);
+					return 0;	
+				}
 			}
 			return 0;
 
