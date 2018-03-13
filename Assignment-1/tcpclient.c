@@ -57,7 +57,26 @@ int main(){
 	int server_auth = 0;
 	char data_to_send[100];
 	char* password;
+	int maxlen = 100;
+	char buffer[maxlen];
+	char *pbuffer = buffer;
+	int n;
 
+	int mode;
+	char inp[10];
+
+	printf("1. New User?\n");
+	printf("2. Existing User? Login\n");
+	printf("3. Exit\n");
+
+
+	scanf("%s", inp);
+	mode = atoi(inp);
+
+	printf("%d\n", strlen(inp));
+
+
+	
 	// do{
 		printf("Enter Username: ");
 		scanf("%s", username);
@@ -76,18 +95,17 @@ int main(){
 	// }while(server_auth != 1);
 
 
-	int maxlen = 100;
-	char buffer[maxlen];
-	char *pbuffer = buffer;
 
-	recv(sock, pbuffer, maxlen, 0);
+	n = recv(sock, pbuffer, maxlen, 0);
+	buffer[n] = '\0';
 
 	printf("Response from Server: %s\n", buffer);
 
 	char buffer2[maxlen];
 	char *pbuffer2 = buffer2;
 
-	recv(sock, pbuffer2, maxlen, 0);
+	n = recv(sock, pbuffer2, maxlen, 0);
+	buffer2[n] = '\0';
 
 	printf("Response from Server: %s  %ld\n", buffer2, strlen(buffer2));
 

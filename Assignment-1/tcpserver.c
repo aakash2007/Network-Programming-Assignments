@@ -81,7 +81,7 @@ user_ptr verify_user(char *inp_str){
 
 	user_ptr tmp = user_arr_begin;
 
-	for (int i = 0; i < registered_users; ++i)
+	for (int i = 0; i < *registered_users; ++i)
 	{
 		if(strcmp(tmp->username, usrnm) == 0){		// User is Present
 			if(strcmp(tmp->password, pass) == 0){	// Passwords Matched
@@ -104,15 +104,15 @@ void create_new_user(char* usr_str){
 }
 
 void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
-	int maxlen = 100;
+	int maxlen = 256;
 	char buffer[maxlen];
 	char *pbuffer = buffer;
+	int n;
 
-	recv(conn_sockfd, pbuffer, maxlen, 0);
-	// read(conn_sockfd, pbuffer, maxlen);
-	printf("%s\n", buffer);
 
-	// printf("Recieved String: %s\n", buffer);
+	n = recv(conn_sockfd, pbuffer, maxlen, 0);
+	buffer[n] = '\0';
+	printf("%s %ld\n", buffer, strlen(buffer));
 	user_ptr conn_user = verify_user(buffer);
 	// printf("Verification: %d\n", resp);
 
@@ -123,14 +123,15 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 		conn_user->online_status = 1;
 
 		strcpy(resp, "1");
-		send(conn_sockfd, resp, 3, 0);
+		send(conn_sockfd, resp, strlen(resp), 0);
+		sleep(0.01);
 
 		char welcome[100];
 		strcpy(welcome, "Welcome ");
 		strcat(welcome, conn_user->first_name);
 		strcat(welcome, "!");
-		printf("%s %d\n", welcome, strlen(welcome));
-		send(conn_sockfd, welcome, 100, 0);
+		printf("%s %ld\n", welcome, strlen(welcome));
+		send(conn_sockfd, welcome, strlen(welcome), 0);
 
 		
 
