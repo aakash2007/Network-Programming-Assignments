@@ -181,6 +181,7 @@ int main(){
 					if(!(op == 1 || op == 2 || op == 3 || op == 4)){
 						printf("Incorrect Choice. Please Try Again\n\n");
 					}
+					fflush(stdin);
 				}while(!(op == 1 || op == 2 || op == 3 || op == 4));
 
 				if(op == 1){
@@ -195,10 +196,10 @@ int main(){
 					printf("Enter Message: ");
 					fgets(snd_msg.msg_text, 100, stdin);
 					fgets(snd_msg.msg_text, 100, stdin);
-
+					
 					char *msg_to_send = encode_msg(snd_msg);
 					printf("\nMessage Sent!\n", msg_to_send);
-					printf("%s\n", msg_to_send);
+					printf("%s %ld\n", msg_to_send, strlen(msg_to_send));
 					send(sock, msg_to_send, strlen(msg_to_send), 0);
 				}
 				else if(op == 2){

@@ -123,11 +123,11 @@ int create_new_user(char* usr_str){
 	char* pt;
 	pt = strtok(tstr, ",");
 	strcpy(usrnm, pt);
-	pt = strtok(tstr, ",");
+	pt = strtok(NULL, ",");
 	strcpy(pass, pt);
-	pt = strtok(tstr, ",");
+	pt = strtok(NULL, ",");
 	strcpy(fname, pt);
-	pt = strtok(tstr, ",");
+	pt = strtok(NULL, ",");
 	strcpy(lname, pt);
 
 	user_ptr ptr = find_user(usrnm);
@@ -143,15 +143,15 @@ int create_new_user(char* usr_str){
 	strcpy(new_usr.last_name, lname);
 
 	// *************semaphore ACCESSING RESOURCE  todo
-	(*registered_users)++;
-	int usrid = (*registered_users)*10 + 1;
-	new_usr.user_id = usrid;
-
 	ptr = user_arr_begin;
 	for (int i = 0; i < *registered_users; ++i)
 	{
 		ptr++;
 	}
+	(*registered_users)++;
+	int usrid = (*registered_users)*10 + 1;
+	new_usr.user_id = usrid;
+
 	*ptr = new_usr;
 	// *************semaphore RELEASING RESOURCE  todo
 
@@ -192,9 +192,9 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 
 		n = recv(conn_sockfd, pbuffer, maxlen, 0);
 		buffer[n] = '\0';
-		// printf("%s %ld\n", buffer, strlen(buffer));
+		printf("%s %ld\n", buffer, strlen(buffer));
 		user_ptr conn_user = verify_user(buffer);
-		// printf("Verification: %d\n", ver_usr);
+		printf("Verification:\n");
 
 		char ver_usr[3];
 
@@ -233,7 +233,9 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 				if(oper == 1){
 					n = recv(conn_sockfd, pbuffer, maxlen, 0);
 					buffer[n] = '\0';
-					printf("%s\n", buffer);
+					printf("a\n");
+					printf("%s %ld\n", buffer, strlen(buffer));
+					printf("b\n");
 				}
 				else if(oper == 2){
 
@@ -360,6 +362,12 @@ int main(){
 	// if(temp == 0){
 	// 	while(1){
 	// 		sleep(2);
+	// 		user_ptr ppp = user_arr_begin;
+	// 		for (int i = 0; i < *registered_users; ++i)
+	// 		{
+	// 			printf("KS %ld %s %s %s %s\n", ppp->user_id, ppp->username, ppp->password, ppp->first_name, ppp->last_name);
+	// 			ppp++;
+	// 		}
 	// 		printf("%d \n", *registered_users);
 	// 	}
 	// }
