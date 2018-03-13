@@ -110,7 +110,39 @@ int main(){
 			n = recv(sock, pbuffer, maxlen, 0);
 			buffer[n] = '\0';
 
-			printf("Response from Server: %s  %ld\n", buffer, strlen(buffer));
+			printf("\nMessage from Server: %s\n\n", buffer);
+
+			pid_t lis_child;
+			lis_child = fork();
+
+			if(lis_child == 0){
+				while(1){
+					n = recv(sock, pbuffer, maxlen, 0);
+					buffer[n] = '\0';
+
+				}
+				exit(0);
+			}
+
+			int op;
+			do{
+				printf("What would you like to do?\n");
+				printf("1. Send a Private Message\n");
+				printf("2. Send a Broadcast Message\n");
+				printf("3. Get Status of Other Users\n");
+				printf("4. Exit\n");
+
+				scanf("%s", inp);
+				op = atoi(inp);
+
+				if(!(op == 1 || op == 2 || op == 3 || op == 4)){
+					printf("Incorrect Choice. Please Try Again\n\n");
+				}
+			}while(!(op == 1 || op == 2 || op == 3 || op == 4));
+
+			printf("%d\n", op);
+			return 0;
+
 		}
 		else{
 			printf("Incorrect Username or Password!\nPlease Connect Again and Retry.\n");
@@ -124,6 +156,7 @@ int main(){
 		return 0;
 	}
 
+	wait(NULL);
 	close(sock);
 	return 0;
 }
