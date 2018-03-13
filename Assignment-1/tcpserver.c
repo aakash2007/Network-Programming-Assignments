@@ -70,6 +70,21 @@ void server_start_message(){
 	printf("Server Starting on %s, Port: %d\n", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr), SERVER_PORT);
 }
 
+user_ptr find_user(char* usrnm){
+	
+	user_ptr tmp = user_arr_begin;
+
+	for (int i = 0; i < *registered_users; ++i)
+	{
+		if(strcmp(tmp->username, usrnm) == 0){		// User is Present
+			return tmp;
+		}
+		tmp++;
+	}
+	return NULL;		// User doesn't exist, ask to create new.
+}
+
+
 user_ptr verify_user(char *inp_str){
 
 	char vstr[50];
@@ -99,9 +114,11 @@ user_ptr verify_user(char *inp_str){
 	return NULL;		// User doesn't exist, ask to create new.
 }
 
-void create_new_user(char* usr_str){
+int create_new_user(char* usr_str){
 	char tstr[200];
 	strcpy(tstr, usr_str);
+	printf("in: %s\n", tstr);
+
 	
 }
 
@@ -117,7 +134,22 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 	mode = atoi(buffer);
 
 	if(mode == 1){
-
+		n = recv(conn_sockfd, pbuffer, maxlen, 0);	
+		buffer[n] = '\0';
+		int scc = create_new_user(buffer);
+		char scc_str;
+		if(scc == 1){
+			strcpy(scc_str, "1");
+			send(conn_sockfd, scc_str, strlen(scc_str), 0);
+			sleep(0.01);
+		}
+		else{
+			strcpy(scc_str, "2");
+			send(conn_sockfd, scc_str, strlen(scc_str), 0);
+			sleep(0.01);
+		}
+		close(conn_sockfd);
+		return 0;
 	}
 	else if(mode == 2){
 
@@ -149,7 +181,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 			pid_t lis_child;
 			lis_child = fork();
 
-			if(lis_child == 0){
+			if(lis_child == 0){			// Child Process to listen to incoming message for client
 				while(1){
 					// MESSAGE inc_msg = msgrcv();
 				}
@@ -161,6 +193,15 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 				n = recv(conn_sockfd, pbuffer, maxlen, 0);
 				buffer[n] = '\0';
 				oper = atoi(buffer);
+				if(oper == 1){
+
+				}
+				else if(oper == 2){
+
+				}
+				else if(oper == 3){
+
+				}
 			}
 
 

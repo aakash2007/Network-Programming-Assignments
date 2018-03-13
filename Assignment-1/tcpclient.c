@@ -57,7 +57,7 @@ int main(){
 	int server_auth = 0;
 	char data_to_send[100];
 	char* password;
-	int maxlen = 100;
+	int maxlen = 256;
 	char buffer[maxlen];
 	char *pbuffer = buffer;
 	int n;
@@ -86,6 +86,46 @@ int main(){
 		send(sock, mode, strlen(mode), 0);
 		sleep(0.01);
 
+		// printf("Create New User*\n");
+		char usrnm[20], fname[50], lname[50];
+		printf("\nEnter Details: \n");
+		printf("Username: ");
+		scanf("%s", usrnm);
+		printf("First Name: ");
+		scanf("%s", fname);
+		printf("Last Name: ");
+		scanf("%s", lname);
+		password = getpass("Password: ");
+
+		char new_user[maxlen];
+		strcpy(new_user, usrnm);
+		strcat(new_user, ",");
+		strcat(new_user, password);
+		strcat(new_user, ",");
+		strcat(new_user, fname);
+		strcat(new_user, ",");
+		strcat(new_user, lname);
+
+		send(sock, new_user, strlen(new_user), 0);
+		sleep(0.01);
+
+		n = recv(sock, pbuffer, maxlen, 0);
+		buffer[n] = '\0';
+
+		int scc = atoi(buffer);
+
+		if(scc = 1){
+			printf("User Successfully Created!\nConnect Again to Login.\n");
+			close(sock);
+			return 0;
+		}
+		else{
+			printf("Username Already Exists!\nPlease Try Again with different username.\n");
+			close(sock);
+			return 0;
+		}
+
+
 	}
 	else if(md == 2){
 		strcpy(mode, "2");
@@ -100,7 +140,7 @@ int main(){
 		strcat(data_to_send, ",");
 		strcat(data_to_send, password);
 		// printf("%s 	%ld\n", data_to_send, strlen(data_to_send));
-		send(sock, data_to_send, 100, 0);
+		send(sock, data_to_send, strlen(data_to_send), 0);
 		n = recv(sock, pbuffer, maxlen, 0);
 		buffer[n] = '\0';
 
@@ -131,6 +171,7 @@ int main(){
 				printf("2. Send a Broadcast Message\n");
 				printf("3. Get Status of Other Users\n");
 				printf("4. Exit\n");
+				printf("Select an option: ");
 
 				scanf("%s", inp);
 				op = atoi(inp);
@@ -140,16 +181,23 @@ int main(){
 				}
 			}while(!(op == 1 || op == 2 || op == 3 || op == 4));
 
-			printf("%d\n", op);
-
 			if(op == 1){
+				strcpy(mode, "1");
+				send(sock, mode, strlen(mode), 0);
+				sleep(0.01);
 
 			}
 			else if(op == 2){
+				strcpy(mode, "2");
+				send(sock, mode, strlen(mode), 0);
+				sleep(0.01);
 
 			}
 			else if(op == 3){
-				
+				strcpy(mode, "3");
+				send(sock, mode, strlen(mode), 0);
+				sleep(0.01);
+
 			}
 			else if(op == 4){
 				printf("\nGoodbye!\n");
