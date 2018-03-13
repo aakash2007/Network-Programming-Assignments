@@ -70,6 +70,7 @@ int main(){
 		printf("1. New User?\n");
 		printf("2. Existing User? Login\n");
 		printf("3. Exit\n");
+		printf("Select an option: ");
 
 		scanf("%s", inp);
 		md = atoi(inp);

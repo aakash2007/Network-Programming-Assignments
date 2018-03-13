@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
+#include <sys/signal.h>
 
 int MAX_USERS = 20;
 const int SERVER_PORT = 6789;
@@ -142,14 +143,16 @@ int create_new_user(char* usr_str){
 	strcpy(new_usr.last_name, lname);
 
 	// *************semaphore ACCESSING RESOURCE  todo
-	ptr = user_arr_begin;
+	(*registered_users)++;
+	int usrid = (*registered_users)*10 + 1;
+	new_usr.user_id = usrid;
 
+	ptr = user_arr_begin;
 	for (int i = 0; i < *registered_users; ++i)
 	{
 		ptr++;
 	}
 	*ptr = new_usr;
-	(*registered_users)++;
 	// *************semaphore RELEASING RESOURCE  todo
 
 
@@ -235,6 +238,12 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 				}
 				else if(oper == 3){
 
+				}
+				else{
+					close(conn_sockfd);
+					kill(lis_child, SIGINT);
+					wait(NULL);
+					exit(0);
 				}
 			}
 
@@ -365,7 +374,6 @@ int main(){
 		}									// Parent keeps listening
 		else{
 			// close(conn_sockfd);			// Causing Connection Issues
-			wait(NULL);
 		}
 	}
 
@@ -375,5 +383,6 @@ int main(){
 		exit(0);
 	}
 
+	wait(NULL);
 	return 0;
 }
