@@ -56,6 +56,8 @@ typedef struct user_det* user_ptr;
 user_ptr user_arr_begin;
 int* registered_users;
 
+int shmid, msqid, semid;		// System V IPC identifiers
+
 void server_start_message(){
 	int fd;
 	struct ifreq ifr;
@@ -110,7 +112,6 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 	int n;
 
 	int mode;
-
 	n = recv(conn_sockfd, pbuffer, maxlen, 0);	
 	buffer[n] = '\0';
 	mode = atoi(buffer);
@@ -145,7 +146,24 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 			send(conn_sockfd, welcome, strlen(welcome), 0);
 			sleep(0.01);
 
-			
+			pid_t lis_child;
+			lis_child = fork();
+
+			if(lis_child == 0){
+				while(1){
+					MESSAGE inc_msg = msgrcv()
+				}
+				exit(0);
+			}
+
+			while(1){
+				int oper;
+				n = recv(conn_sockfd, pbuffer, maxlen, 0);
+				buffer[n] = '\0';
+				oper = atoi(buffer);
+			}
+
+
 
 		}
 		else{
@@ -179,8 +197,8 @@ int main(){
 
 	// First 4 bytes to store no. of registered users and rest user_det array
 
-	int shmid = shmget(IPC_PRIVATE, arr_sz, 0666);
-	int semid = semget(IPC_PRIVATE, 2, 0666);
+	shmid = shmget(IPC_PRIVATE, arr_sz, 0666);
+	semid = semget(IPC_PRIVATE, 2, 0666);
 	
 	void* shm_ptr = shmat(shmid, NULL, 0);
 	registered_users = (int*)shm_ptr;
@@ -210,7 +228,6 @@ int main(){
 
 
 	// Message Queue for IPC
-	int msqid;
 	if((msqid = msgget(IPC_PRIVATE, 0666 | IPC_CREAT)) == -1){
 		perror("msgget");
 		exit(1);
