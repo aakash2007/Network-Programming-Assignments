@@ -42,11 +42,11 @@ typedef struct user_det{
 MESSAGE decode_msg(char* en_msg){
 	char *pt;
 	MESSAGE rcvd_msg;
-	pt = strtok(en_msg, ",");
+	pt = strtok(en_msg, ";");
 	strcpy(rcvd_msg.msg_from, pt);
-	pt = strtok(NULL, ",");
+	pt = strtok(NULL, ";");
 	strcpy(rcvd_msg.msg_to, pt);
-	pt = strtok(NULL, ",");
+	pt = strtok(NULL, ";");
 	strcpy(rcvd_msg.msg_text, pt);
 
 	return rcvd_msg;
@@ -92,9 +92,9 @@ user_ptr verify_user(char *inp_str){
 	strcpy(vstr, inp_str);
 	char* pt;
 	char usrnm[20], pass[50];
-	pt = strtok(vstr, ",");
+	pt = strtok(vstr, ";");
 	strcpy(usrnm, pt);
-	pt = strtok(NULL, ",");
+	pt = strtok(NULL, ";");
 	strcpy(pass, pt);
 
 	user_ptr tmp = user_arr_begin;
@@ -121,13 +121,13 @@ int create_new_user(char* usr_str){
 	// printf("in: %s\n", tstr);
 	char usrnm[20], fname[50], lname[50], pass[50];
 	char* pt;
-	pt = strtok(tstr, ",");
+	pt = strtok(tstr, ";");
 	strcpy(usrnm, pt);
-	pt = strtok(NULL, ",");
+	pt = strtok(NULL, ";");
 	strcpy(pass, pt);
-	pt = strtok(NULL, ",");
+	pt = strtok(NULL, ";");
 	strcpy(fname, pt);
-	pt = strtok(NULL, ",");
+	pt = strtok(NULL, ";");
 	strcpy(lname, pt);
 
 	user_ptr ptr = find_user(usrnm);

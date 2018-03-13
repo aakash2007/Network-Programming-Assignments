@@ -17,9 +17,9 @@ typedef struct my_msg		// For Sending Over Network
 char* encode_msg(MESSAGE out_msg){
 	char* en_msg = (char*)malloc(250*sizeof(char));
 	strcpy(en_msg, out_msg.msg_from);
-	strcat(en_msg, ",");
+	strcat(en_msg, ";");
 	strcat(en_msg, out_msg.msg_to);
-	strcat(en_msg, ",");
+	strcat(en_msg, ";");
 	strcat(en_msg, out_msg.msg_text);
 
 	return en_msg;
@@ -100,11 +100,11 @@ int main(){
 
 		char new_user[maxlen];
 		strcpy(new_user, usrnm);
-		strcat(new_user, ",");
+		strcat(new_user, ";");
 		strcat(new_user, password);
-		strcat(new_user, ",");
+		strcat(new_user, ";");
 		strcat(new_user, fname);
-		strcat(new_user, ",");
+		strcat(new_user, ";");
 		strcat(new_user, lname);
 
 		send(sock, new_user, strlen(new_user), 0);
@@ -137,7 +137,7 @@ int main(){
 		password = getpass("Enter Password: ");
 		// Generating Verification String
 		strcpy(data_to_send, username);
-		strcat(data_to_send, ",");
+		strcat(data_to_send, ";");
 		strcat(data_to_send, password);
 		// printf("%s 	%ld\n", data_to_send, strlen(data_to_send));
 		send(sock, data_to_send, strlen(data_to_send), 0);
@@ -152,17 +152,17 @@ int main(){
 
 			printf("\nMessage from Server: %s\n\n", buffer);
 
-			pid_t lis_child;
-			lis_child = fork();
+			// pid_t lis_child;
+			// lis_child = fork();
 
-			if(lis_child == 0){
-				while(1){
-					n = recv(sock, pbuffer, maxlen, 0);
-					buffer[n] = '\0';
+			// if(lis_child == 0){
+			// 	while(1){
+			// 		n = recv(sock, pbuffer, maxlen, 0);
+			// 		buffer[n] = '\0';
 
-				}
-				exit(0);
-			}
+			// 	}
+			// 	exit(0);
+			// }
 
 			while(1){
 
