@@ -114,34 +114,44 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 	n = recv(conn_sockfd, pbuffer, maxlen, 0);	
 	buffer[n] = '\0';
 	mode = atoi(buffer);
-	printf("%s %ld %d\n", buffer, strlen(buffer), mode);	
 
-	n = recv(conn_sockfd, pbuffer, maxlen, 0);
-	buffer[n] = '\0';
-	printf("%s %ld\n", buffer, strlen(buffer));
-	user_ptr conn_user = verify_user(buffer);
-	// printf("Verification: %d\n", ver_usr);
-
-	char ver_usr[3];
-
-	if(conn_user != NULL){		// Verification OK
-		conn_user->child_pid = getpid();
-		conn_user->online_status = 1;
-
-		strcpy(ver_usr, "1");
-		send(conn_sockfd, ver_usr, strlen(ver_usr), 0);
-		sleep(0.01);
-
-		char welcome[100];
-		strcpy(welcome, "Welcome ");
-		strcat(welcome, conn_user->first_name);
-		strcat(welcome, "!");
-		printf("%s %ld\n", welcome, strlen(welcome));
-		send(conn_sockfd, welcome, strlen(welcome), 0);
+	if(mode == 1){
 
 	}
-	else{
+	else if(mode == 2){
 
+		n = recv(conn_sockfd, pbuffer, maxlen, 0);
+		buffer[n] = '\0';
+		// printf("%s %ld\n", buffer, strlen(buffer));
+		user_ptr conn_user = verify_user(buffer);
+		// printf("Verification: %d\n", ver_usr);
+
+		char ver_usr[3];
+
+		if(conn_user != NULL){		// Verification OK
+			conn_user->child_pid = getpid();
+			conn_user->online_status = 1;
+
+			strcpy(ver_usr, "1");
+			send(conn_sockfd, ver_usr, strlen(ver_usr), 0);
+			sleep(0.01);
+
+			// Welcome User
+			char welcome[100];
+			strcpy(welcome, "Welcome ");
+			strcat(welcome, conn_user->first_name);
+			strcat(welcome, "!");
+			// printf("%s %ld\n", welcome, strlen(welcome));
+			send(conn_sockfd, welcome, strlen(welcome), 0);
+			sleep(0.01);
+
+
+		}
+		else{
+			strcpy(ver_usr, "2");
+			send(conn_sockfd, ver_usr, strlen(ver_usr), 0);
+			sleep(0.01);
+		}
 	}
 	// else if(ver_usr == 2){		// Password Incorrect
 	// 	strcpy(res, "2");

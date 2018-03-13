@@ -78,7 +78,6 @@ int main(){
 			printf("Incorrect Choice. Please Try Again\n\n");
 		}
 
-		printf("%d\n", strlen(inp));
 	}while(!(md == 1 || md == 2 || md == 3));
 
 	char mode[10];
@@ -96,27 +95,29 @@ int main(){
 		printf("Enter Username: ");
 		scanf("%s", username);
 		password = getpass("Enter Password: ");
-
 		// Generating Verification String
 		strcpy(data_to_send, username);
 		strcat(data_to_send, ",");
 		strcat(data_to_send, password);
-
-		printf("%s 	%ld\n", data_to_send, strlen(data_to_send));
-
+		// printf("%s 	%ld\n", data_to_send, strlen(data_to_send));
 		send(sock, data_to_send, 100, 0);
 		n = recv(sock, pbuffer, maxlen, 0);
 		buffer[n] = '\0';
 
-		printf("Response from Server: %s\n", buffer);
+		int usr_ver = atoi(buffer);
+		
+		if(usr_ver == 1){
+			n = recv(sock, pbuffer, maxlen, 0);
+			buffer[n] = '\0';
 
-		char buffer2[maxlen];
-		char *pbuffer2 = buffer2;
+			printf("Response from Server: %s  %ld\n", buffer, strlen(buffer));
+		}
+		else{
+			printf("Incorrect Username or Password!\nPlease Connect Again and Retry.\n");
+			close(sock);
+			return 0;
+		}
 
-		n = recv(sock, pbuffer2, maxlen, 0);
-		buffer2[n] = '\0';
-
-		printf("Response from Server: %s  %ld\n", buffer2, strlen(buffer2));
 	}
 	else{
 		close(sock);
