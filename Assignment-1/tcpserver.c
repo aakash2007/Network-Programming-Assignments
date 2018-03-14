@@ -141,6 +141,7 @@ int create_new_user(char* usr_str){
 	strcpy(new_usr.password, pass);
 	strcpy(new_usr.first_name, fname);
 	strcpy(new_usr.last_name, lname);
+	new_usr.online_status = 0;
 
 	// *************semaphore ACCESSING RESOURCE  todo
 	ptr = user_arr_begin;
@@ -297,7 +298,28 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 					}
 				}
 				else if(oper == 2){
-					
+					n = recv(conn_sockfd, pbuffer, maxlen, 0);
+					buffer[n] = '\0';
+					printf("%s %ld\n", buffer, strlen(buffer));
+					MESSAGE rcvd_msg = decode_msg(buffer);
+					printf("from user %s %s %s\n", rcvd_msg.msg_from, rcvd_msg.msg_to, rcvd_msg.msg_text);
+
+					user_ptr frm_usr = find_user(rcvd_msg.msg_from);
+
+					char msg_ack[15];
+					strcpy(msg_ack, "msgack;");
+					struct mymsg_buf q_msg;
+					q_msg.mtype = 10;
+					strcpy(q_msg.msg_from, frm_usr->first_name);
+					strcpy(q_msg.msg_text, rcvd_msg.msg_text);
+
+					printf("to msq %s %ld %s\n", q_msg.msg_from, q_msg.mtype, q_msg.msg_text);
+					msgsnd(msqid, &q_msg, sizeof(q_msg), 0);
+						
+					strcat(msg_ack, "1");
+					send(conn_sockfd, msg_ack, strlen(msg_ack), 0);
+					sleep(0.01);
+
 				}
 				else if(oper == 3){
 
@@ -430,6 +452,30 @@ int main(){
 		}
 	}
 
+	pid_t broad_child;
+	broad_child = fork();
+	if(broad_child == 0){
+		while(1){
+			sleep(1);
+			if(kill(getppid(), 0) == 0){
+					struct mymsg_buf inc_msg;
+					msgrcv(msqid, &inc_msg, sizeof(inc_msg), 10, 0);
+					// printf("broad %s\n", inc_msg.msg_text);
+					user_ptr ptr = user_arr_begin;
+					for (int i = 0; i < *registered_users; ++i)
+					{
+						inc_msg.mtype = ptr->user_id;
+						if(!(strcmp(inc_msg.msg_from, ptr->first_name)==0))
+							msgsnd(msqid, &inc_msg, sizeof(inc_msg), 0);
+						ptr++;
+					}
+				}
+				else{
+					close(conn_sockfd);
+					exit(0);
+				}
+		}
+	}
 
 	pid_t child_pid;
 	for(;;){		// to accept connections and create child processes

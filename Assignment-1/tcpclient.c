@@ -175,7 +175,7 @@ int main(){
 		n = recv(sock, pbuffer, maxlen, 0);
 		buffer[n] = '\0';
 
-		printf("vv00 %s\n", buffer);
+		// printf("vv00 %s\n", buffer);
 		char *pt, tstr[maxlen];
 		strcpy(tstr, buffer);
 		pt = strtok(tstr, ";");
@@ -255,9 +255,18 @@ int main(){
 					send(sock, mode, strlen(mode), 0);
 					sleep(0.01);
 
-					n = recv(sock, pbuffer, maxlen, 0);
-					buffer[n] = '\0';
-					printf("%s\n", buffer);					
+					MESSAGE snd_msg;
+					strcpy(snd_msg.msg_from, username);
+					strcpy(snd_msg.msg_to, "broadcast");
+					printf("Enter Message: ");
+					fgets(snd_msg.msg_text, 100, stdin);
+					fgets(snd_msg.msg_text, 100, stdin);
+
+					char *msg_to_send = encode_msg(snd_msg);
+					// printf("%s %ld\n", msg_to_send, strlen(msg_to_send));
+					send(sock, msg_to_send, strlen(msg_to_send)-1, 0);
+					sleep(0.01);
+
 				}
 				else if(op == 3){
 					strcpy(mode, "3");
