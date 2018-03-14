@@ -262,7 +262,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 							printf("lls %s\n", inc_msg.msg_text);
 							char send_msg_str[maxlen];
 							strcpy(send_msg_str, "inc_msg;");
-							strcat(send_msg_str, inc_msg.msg_from);
+							strcat(send_msg_str, ptr->first_name);
 							strcat(send_msg_str, ";");
 							strcat(send_msg_str, inc_msg.msg_text);
 							sleep(0.5);
@@ -344,10 +344,26 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 
 				}
 				else if(oper == 4){
-
+					n = recv(conn_sockfd, pbuffer, maxlen, 0);
+					buffer[n] = '\0';
+					printf("%s %ld\n", buffer, strlen(buffer));
+					char *pt, tstr[maxlen];
+					strcpy(tstr, buffer);
+					pt = strtok(tstr, ";");
+					pt = strtok(NULL, ";");
+					user_ptr ptr = find_user(pt);
+					(conn_user->blocked_id)[ptr->user_id] = 1;
 				}
 				else if(oper == 5){
-
+					n = recv(conn_sockfd, pbuffer, maxlen, 0);
+					buffer[n] = '\0';
+					printf("%s %ld\n", buffer, strlen(buffer));
+					char *pt, tstr[maxlen];
+					strcpy(tstr, buffer);
+					pt = strtok(tstr, ";");
+					pt = strtok(NULL, ";");
+					user_ptr ptr = find_user(pt);
+					(conn_user->blocked_id)[ptr->user_id] = 0;
 				}
 				else if(oper == 6){
 					conn_user->online_status = 0;
@@ -417,6 +433,9 @@ int main(){
 	memset(u2.blocked_id, 0, sizeof(u2.blocked_id));
 	memset(u3.blocked_id, 0, sizeof(u3.blocked_id));
 
+	u1.blocked_id[3] = 1;
+	u3.blocked_id[2] = 1;
+
 	user_ptr ptr = user_arr_begin;
 	*ptr = u1;
 	ptr++;
@@ -467,21 +486,21 @@ int main(){
 
 	// **To test user creation
 
-	pid_t temp;
-	temp = fork();
-	if(temp == 0){
-		while(1){
-			sleep(2);
-			// update_user_status();
-			user_ptr ppp = user_arr_begin;
-			for (int i = 0; i < *registered_users; ++i)
-			{
-				printf("KS %ld %s %s %s %s %d\n", ppp->user_id, ppp->username, ppp->password, ppp->first_name, ppp->last_name, ppp->online_status);
-				ppp++;
-			}
-			printf("%d \n", *registered_users);
-		}
-	}
+	// pid_t temp;
+	// temp = fork();
+	// if(temp == 0){
+	// 	while(1){
+	// 		sleep(2);
+	// 		// update_user_status();
+	// 		user_ptr ppp = user_arr_begin;
+	// 		for (int i = 0; i < *registered_users; ++i)
+	// 		{
+	// 			printf("KS %ld %s %s %s %s %d\n", ppp->user_id, ppp->username, ppp->password, ppp->first_name, ppp->last_name, ppp->online_status);
+	// 			ppp++;
+	// 		}
+	// 		printf("%d \n", *registered_users);
+	// 	}
+	// }
 
 	pid_t broad_child;
 	broad_child = fork();

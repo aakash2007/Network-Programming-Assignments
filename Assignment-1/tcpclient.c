@@ -279,10 +279,30 @@ int main(){
 					send(sock, mode, strlen(mode), 0);
 					sleep(0.01);
 
+					char bl_usr[20];
+					printf("\n Enter Username to Block: ");
+					scanf("%s", bl_usr);
+
+					char block_str[maxlen];
+					strcpy(block_str, "block;");
+					strcat(block_str, bl_usr);
+					send(sock, block_str, strlen(block_str), 0);
+					sleep(0.01);
+
 				}
 				else if(op == 5){
 					strcpy(mode, "5");
 					send(sock, mode, strlen(mode), 0);
+					sleep(0.01);
+
+					char unbl_usr[20];
+					printf("\nEnter Username to Unblock: ");
+					scanf("%s", unbl_usr);
+
+					char block_str[maxlen];
+					strcpy(block_str, "unblock;");
+					strcat(block_str, unbl_usr);
+					send(sock, block_str, strlen(block_str), 0);
 					sleep(0.01);
 
 				}
