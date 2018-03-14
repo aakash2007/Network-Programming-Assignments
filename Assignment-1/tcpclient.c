@@ -168,12 +168,18 @@ int main(){
 			lis_child = fork();
 
 			if(lis_child == 0){
+				pid_t parent = getppid();
 				while(1){
 					sleep(1);
-					n = recv(sock, pbuffer, maxlen, 0);
-					buffer[n] = '\0';
-					printf("\nchild %s\n", buffer);
-
+					if(kill(parent, 0) == 0){
+						n = recv(sock, pbuffer, maxlen, 0);
+						buffer[n] = '\0';
+						printf("\nchild %s\n", buffer);
+					}
+					else{
+						close(sock);
+						exit(0);
+					}
 				}
 				exit(0);
 			}

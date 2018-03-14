@@ -216,15 +216,25 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 			send(conn_sockfd, welcome, strlen(welcome), 0);
 			sleep(0.01);
 
-			// pid_t lis_child;
-			// lis_child = fork();
+			pid_t lis_child;
+			lis_child = fork();
 
-			// if(lis_child == 0){			// Child Process to listen to incoming message for client
-			// 	while(1){
-			// 		// MESSAGE inc_msg = msgrcv();
-			// 	}
-			// 	exit(0);
-			// }
+			if(lis_child == 0){			// Child Process to listen to incoming message for client
+				pid_t parent = getppid();
+				while(1){
+					sleep(1);
+					if(kill(parent, 0) == 0){
+						struct mymsg_buf inc_msg;
+						msgrcv(msqid, &inc_msg, sizeof(inc_msg), conn_user->user_id, 0);
+						printf("lls %s\n", inc_msg.msg_text);
+					}
+					else{
+						close(conn_sockfd);
+						exit(0);
+					}
+				}
+				exit(0);
+			}
 
 			while(1){
 				int oper;
