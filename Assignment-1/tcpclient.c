@@ -46,7 +46,7 @@ void handle_output(char* inp_str){
 			printf("\nMessage Sent\n");
 		}
 		else{
-			printf("No Such User Exists!\n");
+			printf("\nNo Such User Exists!\n");
 		}
 	}
 	else if(strcmp(pt, "userstat") == 0){
@@ -66,12 +66,17 @@ void handle_output(char* inp_str){
 			strcpy(online, "Offline");
 		}
 		// printf("oon %s\n", online);
-		printf("\n%s\t%s\t%s", usrnm, fullname, online);
+		if(strcmp(usrnm, username)==0){
+			printf("\n%s*\t\t%s\t%s", usrnm, fullname, online);
+		}
+		else{
+			printf("\n%s\t\t%s\t%s", usrnm, fullname, online);
+		}
 	}
 	else if(strcmp(pt, "statcnt") == 0){
 		pt = strtok(NULL, ";");
 		int cnt = atoi(pt);
-		printf("Total Number of Users: %d\n", cnt);
+		printf("\nTotal Number of Users: %d\nUSERNAME\t\tNAME\tSTATUS", cnt);
 	}
 	else if(strcmp(pt, "gibber") == 0){
 		printf("\n");
@@ -80,14 +85,14 @@ void handle_output(char* inp_str){
 
 int main(){
 
-	const char* server_name = "127.0.0.1";
-	// const char* server_name = "192.168.43.55";
-	// char server_name[20];
-	const int server_port = 6789;
-
-	// printf("Enter Server IP Address: ");
-	// scanf("%s", server_name);
-
+	char server_name[15];
+	printf("Enter Server IP Address: ");
+	scanf("%s", server_name);
+	int server_port;
+	printf("Enter Server Port No.: ");
+	scanf("%d", &server_port);
+	printf("\n");
+	
 	struct sockaddr_in server_addr;
 	memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;

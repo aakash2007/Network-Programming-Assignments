@@ -220,7 +220,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 			sleep(0.01);
 		}
 		close(conn_sockfd);
-		return;
+		exit(0);
 	}
 	else if(mode == 2){
 
@@ -264,14 +264,14 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 						user_ptr ptr = find_user(inc_msg.msg_from);
 
 						if((conn_user->blocked_id)[ptr->user_id] == 0){
-							printf("lls %s\n", inc_msg.msg_text);
+							// printf("lls %s\n", inc_msg.msg_text);
 							char send_msg_str[maxlen];
 							strcpy(send_msg_str, "inc_msg;");
 							strcat(send_msg_str, ptr->first_name);
 							strcat(send_msg_str, ";");
 							strcat(send_msg_str, inc_msg.msg_text);
 							sleep(0.5);
-							printf("send_msg_str %s\n", send_msg_str);
+							// printf("send_msg_str %s\n", send_msg_str);
 							send(conn_sockfd, send_msg_str, strlen(send_msg_str), 0);
 						}
 					}
@@ -293,9 +293,9 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 				if(oper == 1){
 					n = recv(conn_sockfd, pbuffer, maxlen, 0);
 					buffer[n] = '\0';
-					printf("%s %ld\n", buffer, strlen(buffer));
+					// printf("%s %ld\n", buffer, strlen(buffer));
 					MESSAGE rcvd_msg = decode_msg(buffer);
-					printf("from user %s %s %s\n", rcvd_msg.msg_from, rcvd_msg.msg_to, rcvd_msg.msg_text);
+					// printf("from user %s %s %s\n", rcvd_msg.msg_from, rcvd_msg.msg_to, rcvd_msg.msg_text);
 
 					user_ptr frm_usr = find_user(rcvd_msg.msg_from);
 					user_ptr targ_usr = find_user(rcvd_msg.msg_to);
@@ -308,7 +308,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 						strcpy(q_msg.msg_from, frm_usr->username);
 						strcpy(q_msg.msg_text, rcvd_msg.msg_text);
 
-						printf("to msq %s %ld %s\n", q_msg.msg_from, q_msg.mtype, q_msg.msg_text);
+						// printf("to msq %s %ld %s\n", q_msg.msg_from, q_msg.mtype, q_msg.msg_text);
 						msgsnd(msqid, &q_msg, sizeof(q_msg), 0);
 						
 						strcat(msg_ack, "1");
@@ -324,9 +324,9 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 				else if(oper == 2){
 					n = recv(conn_sockfd, pbuffer, maxlen, 0);
 					buffer[n] = '\0';
-					printf("%s %ld\n", buffer, strlen(buffer));
+					// printf("%s %ld\n", buffer, strlen(buffer));
 					MESSAGE rcvd_msg = decode_msg(buffer);
-					printf("from user %s %s %s\n", rcvd_msg.msg_from, rcvd_msg.msg_to, rcvd_msg.msg_text);
+					// printf("from user %s %s %s\n", rcvd_msg.msg_from, rcvd_msg.msg_to, rcvd_msg.msg_text);
 
 					user_ptr frm_usr = find_user(rcvd_msg.msg_from);
 
@@ -337,7 +337,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 					strcpy(q_msg.msg_from, frm_usr->username);
 					strcpy(q_msg.msg_text, rcvd_msg.msg_text);
 
-					printf("to msq %s %ld %s\n", q_msg.msg_from, q_msg.mtype, q_msg.msg_text);
+					// printf("to msq %s %ld %s\n", q_msg.msg_from, q_msg.mtype, q_msg.msg_text);
 					msgsnd(msqid, &q_msg, sizeof(q_msg), 0);
 						
 					strcat(msg_ack, "1");
@@ -348,7 +348,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 				else if(oper == 3){
 					n = recv(conn_sockfd, pbuffer, maxlen, 0);
 					buffer[n] = '\0';
-					printf("%s %ld\n", buffer, strlen(buffer));
+					// printf("%s %ld\n", buffer, strlen(buffer));
 					// kill(lis_child, SIGUSR1);
 					user_ptr ptr = user_arr_begin;
 					char stat_str[maxlen];
@@ -356,7 +356,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 					char reg_str[20];
 					sprintf(reg_str, "%d", *registered_users);
 					strcat(stat_str, reg_str);
-					printf("stat %s\n", stat_str);
+					// printf("stat %s\n", stat_str);
 					send(conn_sockfd, stat_str, strlen(stat_str), 0);
 					sleep(0.01);					
 
@@ -372,7 +372,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 						char online[20];
 						sprintf(online, "%d", ptr->online_status);
 						strcat(stat_str, online);
-						printf("userstat %s\n", stat_str);
+						// printf("userstat %s\n", stat_str);
 						// stat_str[strlen(stat_str)] = '\0';
 
 						send(conn_sockfd, stat_str, strlen(stat_str), 0);
@@ -387,7 +387,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 				else if(oper == 4){
 					n = recv(conn_sockfd, pbuffer, maxlen, 0);
 					buffer[n] = '\0';
-					printf("%s %ld\n", buffer, strlen(buffer));
+					// printf("%s %ld\n", buffer, strlen(buffer));
 					char *pt, tstr[maxlen];
 					strcpy(tstr, buffer);
 					pt = strtok(tstr, ";");
@@ -398,7 +398,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 				else if(oper == 5){
 					n = recv(conn_sockfd, pbuffer, maxlen, 0);
 					buffer[n] = '\0';
-					printf("%s %ld\n", buffer, strlen(buffer));
+					// printf("%s %ld\n", buffer, strlen(buffer));
 					char *pt, tstr[maxlen];
 					strcpy(tstr, buffer);
 					pt = strtok(tstr, ";");
@@ -420,6 +420,8 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 			strcpy(ver_usr, "verusr;2");
 			send(conn_sockfd, ver_usr, strlen(ver_usr), 0);
 			sleep(0.01);
+			close(conn_sockfd);
+			exit(0);
 		}
 	}
 }
