@@ -5,6 +5,8 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <termios.h>
+#include <dirent.h>
 #define EXIT_SUCCESS 0
 #define BUFFER_SIZE 128
 #define SHELL_TOK_DELIM " \t\r\n\a"
@@ -15,19 +17,81 @@ typedef struct command {
 	int read[2], write[2];
 } Command;
 
+int autocomplete(char *line, int start) {
+	int end = start;
+	while(line[--start] != ' ');	start++;
+	if(start == end)	return 0;
+	struct dirent *de;
+	DIR *dr = opendir(".");
+	if (dr == NULL) {
+		printf("Could not open current directory" );
+		return 0;
+	}
+	while ((de = readdir(dr)) != NULL) {
+		int len = strlen(de->d_name);
+		int i, j;
+		for(i = start, j = 0; i < end && j < len; i++, j++)
+			if(line[i] != de->d_name[j])	break;
+		if(i == end) {
+			for(; j < len; i++,j++)	line[i] = de->d_name[j];
+			return i;
+		}
+	}
+
+	closedir(dr);    
+	return 0;
+}
+
 char *shell_read_line() {
 	int bufsize = BUFFER_SIZE;
 	char *line = (char*)malloc(sizeof(char)*bufsize);
-	int i = 0;
+	int i = 0, spaces = 0;
 	char ch;
-	while((ch = getchar()) != 10) {
+
+	// Removing Bufer from stdin input.
+	struct termios old_settings, new_settings;
+	tcgetattr(STDIN_FILENO,&old_settings);
+	new_settings = old_settings;
+	new_settings.c_lflag &=(~ICANON & ~ECHO);
+	tcsetattr(STDIN_FILENO,TCSANOW,&new_settings);
+
+	while(ch = getchar()) {
 		if(i == bufsize) {
 			bufsize *= 2;
 			line = realloc(line, bufsize);
 		}
-		line[i++] = ch;
-		if(ch == -1)	exit(EXIT_SUCCESS);
+		
+		if(ch != 127 && ch != 12 && ch != 4 && ch != '\t')
+			printf("%c", ch), line[i++] = ch;
+		if(ch == ' ')	spaces++;
+		if(ch == '\t' && i > 0 && spaces > 0) {
+			int len = autocomplete(line, i);
+			while(i < len)	printf("%c", line[i++]);
+		}
+		/* Delete on backspace */
+		if(ch == 127) {
+			if(i > 0) {
+				printf("\b \b");
+				if(line[i] == ' ') spaces--;
+				line[i--] = 0;
+			}
+		}
+		/* Clear on Ctrl+L */
+		if(ch == 12) {
+			strcpy(line, "clear");
+			break;
+		}
+		/* Execute on New Line */
+		if(ch == 10)	break;
+		/* Exit on Ctrl+D */
+		if(ch == 4)	{
+			tcsetattr(STDIN_FILENO,TCSANOW,&old_settings);
+			exit(EXIT_SUCCESS);
+		}
 	}
+
+	/* restore the former settings */
+	tcsetattr(STDIN_FILENO,TCSANOW,&old_settings);
 	return line;
 }
 
@@ -211,16 +275,24 @@ int shell_execute_pipeline(Command *cmds) {
 				write(out, buffer, size);
 			break;
 		}
-
+		else if(strcmp(cmds[i].cmd, "cd") == 0) {
+			if(cmds[i].args[1] != NULL){
+				chdir(cmds[i].args[1]);
+				char cwd[1024];
+				getcwd(cwd, sizeof(cwd));
+				fprintf(stderr, "%s\n", cwd);
+			}
+			continue;
+		}
 		if(cmds[i].write[1] == -1)	pipe(cmds[i].write);
 		pid = fork();
 		if(pid == 0) {
 			dup2(cmds[i].read[0], STDIN_FILENO);
 			dup2(cmds[i].write[1], STDOUT_FILENO);
-			if(execvp(cmds[i].cmd, cmds[i].args) == -1) {
-				fprintf(stderr, "Shell: Command not found: %s\n", cmds[i].cmd);
-				exit(EXIT_FAILURE);
-			}
+				if(execvp(cmds[i].cmd, cmds[i].args) == -1) {
+					fprintf(stderr, "Shell: Command not found: %s\n", cmds[i].cmd);
+					exit(EXIT_FAILURE);
+				}
 		}
 		else {
 			wait(NULL);
@@ -280,7 +352,15 @@ int shell_execute_redirected(Command *cmds) {
 	if(pid == 0) {
 		dup2(input_fd, STDIN_FILENO);
 		dup2(output_fd, STDOUT_FILENO);
-		if(execvp(cmds[0].cmd, cmds[0].args) == -1) {
+		if(strcmp(cmds[0].cmd, "cd") == 0) {
+			if(cmds[0].args[1] != NULL){
+				chdir(cmds[0].args[1]);
+				char cwd[1024];
+				getcwd(cwd, sizeof(cwd));
+				fprintf(stderr, "%s\n", cwd);
+			}
+		}
+		else if(execvp(cmds[0].cmd, cmds[0].args) == -1) {
 			fprintf(stderr, "Shell: Command not found: %s\n", cmds[0].cmd);
 			exit(EXIT_FAILURE);
 		}
