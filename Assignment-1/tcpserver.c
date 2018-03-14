@@ -189,6 +189,10 @@ void update_user_status(){
 	}
 }
 
+void handler(){
+	pause();
+}
+
 void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 	int maxlen = 256;
 	char buffer[maxlen];
@@ -251,6 +255,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 
 			if(lis_child == 0){			// Child Process to listen to incoming message for client
 				pid_t parent = getppid();
+				signal(SIGUSR1, handler);
 				while(1){
 					sleep(1);
 					if(kill(parent, 0) == 0){
@@ -341,7 +346,43 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 
 				}
 				else if(oper == 3){
+					n = recv(conn_sockfd, pbuffer, maxlen, 0);
+					buffer[n] = '\0';
+					printf("%s %ld\n", buffer, strlen(buffer));
+					// kill(lis_child, SIGUSR1);
+					user_ptr ptr = user_arr_begin;
+					char stat_str[maxlen];
+					strcpy(stat_str, "statcnt;");
+					char reg_str[20];
+					sprintf(reg_str, "%d", *registered_users);
+					strcat(stat_str, reg_str);
+					printf("stat %s\n", stat_str);
+					send(conn_sockfd, stat_str, strlen(stat_str), 0);
+					sleep(0.01);					
 
+					for (int i = 0; i < *registered_users; ++i)
+					{
+						strcpy(stat_str, "userstat;");
+						strcat(stat_str, ptr->username);
+						strcat(stat_str, ";");
+						strcat(stat_str, ptr->first_name);
+						strcat(stat_str, " ");
+						strcat(stat_str, ptr->last_name);
+						strcat(stat_str, ";");
+						char online[20];
+						sprintf(online, "%d", ptr->online_status);
+						strcat(stat_str, online);
+						printf("userstat %s\n", stat_str);
+						// stat_str[strlen(stat_str)] = '\0';
+
+						send(conn_sockfd, stat_str, strlen(stat_str), 0);
+						sleep(1);
+						ptr++;
+					}
+					strcpy(stat_str, "gibber");
+					send(conn_sockfd, stat_str, strlen(stat_str), 0);
+					sleep(1);
+					// kill(lis_child, SIGUSR2);
 				}
 				else if(oper == 4){
 					n = recv(conn_sockfd, pbuffer, maxlen, 0);
@@ -370,16 +411,13 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 					kill(lis_child, SIGINT);
 					close(conn_sockfd);
 					// kill(lis_child, SIGINT);
-					// wait(NULL);
+					wait(NULL);
 					exit(0);
 				}
 			}
-
-
-
 		}
 		else{
-			strcpy(ver_usr, "2");
+			strcpy(ver_usr, "verusr;2");
 			send(conn_sockfd, ver_usr, strlen(ver_usr), 0);
 			sleep(0.01);
 		}

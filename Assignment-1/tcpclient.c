@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/signal.h>
 #include <unistd.h>
 
 char username[20];
@@ -31,6 +32,7 @@ void handle_output(char* inp_str){
 	// printf("\n\nssd %s\n\n", tstr);
 	char *pt;
 	pt = strtok(tstr, ";");
+	// printf("pt %s\n", pt);
 	if(strcmp(pt, "inc_msg") == 0){
 		pt = strtok(NULL, ";");
 		printf("\nMessage from %s: ", pt);
@@ -46,6 +48,33 @@ void handle_output(char* inp_str){
 		else{
 			printf("No Such User Exists!\n");
 		}
+	}
+	else if(strcmp(pt, "userstat") == 0){
+		// printf("here \n");
+		pt = strtok(NULL, ";");
+		char usrnm[20], fullname[100], online[20];
+		strcpy(usrnm, pt);
+		pt = strtok(NULL, ";");
+		strcpy(fullname, pt);
+		pt = strtok(NULL, ";");
+		int onl = atoi(pt);
+		// printf("int %d\n", onl);
+		if(onl == 1){
+			strcpy(online, "Online");
+		}
+		else{
+			strcpy(online, "Offline");
+		}
+		// printf("oon %s\n", online);
+		printf("\n%s\t%s\t%s", usrnm, fullname, online);
+	}
+	else if(strcmp(pt, "statcnt") == 0){
+		pt = strtok(NULL, ";");
+		int cnt = atoi(pt);
+		printf("Total Number of Users: %d\n", cnt);
+	}
+	else if(strcmp(pt, "gibber") == 0){
+		printf("\n");
 	}
 }
 
@@ -181,6 +210,7 @@ int main(){
 		pt = strtok(tstr, ";");
 		pt = strtok(NULL, ";");
 		int usr_ver = atoi(pt);
+		// printf("Ver: %d\n", pt);
 		
 		if(usr_ver == 1){
 			n = recv(sock, pbuffer, maxlen, 0);
@@ -197,7 +227,7 @@ int main(){
 					if(kill(parent, 0) == 0){
 						n = recv(sock, pbuffer, maxlen, 0);
 						buffer[n] = '\0';
-						sleep(1);
+						// sleep(1);
 						handle_output(buffer);
 					}
 					else{
@@ -273,6 +303,10 @@ int main(){
 					send(sock, mode, strlen(mode), 0);
 					sleep(0.01);
 
+					char get_st[20];
+					strcpy(get_st, "getstatus");
+					send(sock, get_st, strlen(get_st), 0);
+					sleep(3);
 				}
 				else if(op == 4){
 					strcpy(mode, "4");
@@ -310,6 +344,7 @@ int main(){
 					strcpy(mode, "6");
 					send(sock, mode, strlen(mode), 0);
 					sleep(0.01);
+					kill(lis_child, SIGINT);
 					printf("\nGoodbye!\n");
 					close(sock);
 					return 0;	
