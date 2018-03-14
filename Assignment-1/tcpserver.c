@@ -36,7 +36,7 @@ typedef struct user_det{
 	char last_name[50];
 	char password[50];
 	long user_id;
-	long blocked_id[100];
+	int blocked_id[100];
 	int online_status;
 } USER;
 
@@ -79,6 +79,20 @@ user_ptr find_user(char* usrnm){
 	for (int i = 0; i < *registered_users; ++i)
 	{
 		if(strcmp(tmp->username, usrnm) == 0){		// User is Present
+			return tmp;
+		}
+		tmp++;
+	}
+	return NULL;		// User doesn't exist, ask to create new.
+}
+
+user_ptr find_user_by_name(char* fname){
+	
+	user_ptr tmp = user_arr_begin;
+
+	for (int i = 0; i < *registered_users; ++i)
+	{
+		if(strcmp(tmp->first_name, fname) == 0){		// User is Present
 			return tmp;
 		}
 		tmp++;
@@ -242,15 +256,19 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 					if(kill(parent, 0) == 0){
 						struct mymsg_buf inc_msg;
 						msgrcv(msqid, &inc_msg, sizeof(inc_msg), conn_user->user_id, 0);
-						printf("lls %s\n", inc_msg.msg_text);
-						char send_msg_str[maxlen];
-						strcpy(send_msg_str, "inc_msg;");
-						strcat(send_msg_str, inc_msg.msg_from);
-						strcat(send_msg_str, ";");
-						strcat(send_msg_str, inc_msg.msg_text);
-						sleep(0.5);
-						printf("send_msg_str %s\n", send_msg_str);
-						send(conn_sockfd, send_msg_str, strlen(send_msg_str), 0);
+						user_ptr ptr = find_user(inc_msg.msg_from);
+
+						if((conn_user->blocked_id)[ptr->user_id] == 0){
+							printf("lls %s\n", inc_msg.msg_text);
+							char send_msg_str[maxlen];
+							strcpy(send_msg_str, "inc_msg;");
+							strcat(send_msg_str, inc_msg.msg_from);
+							strcat(send_msg_str, ";");
+							strcat(send_msg_str, inc_msg.msg_text);
+							sleep(0.5);
+							printf("send_msg_str %s\n", send_msg_str);
+							send(conn_sockfd, send_msg_str, strlen(send_msg_str), 0);
+						}
 					}
 					else{
 						conn_user->online_status = 0;
@@ -282,7 +300,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 					if(targ_usr != NULL){
 						struct mymsg_buf q_msg;
 						q_msg.mtype = targ_usr->user_id;
-						strcpy(q_msg.msg_from, frm_usr->first_name);
+						strcpy(q_msg.msg_from, frm_usr->username);
 						strcpy(q_msg.msg_text, rcvd_msg.msg_text);
 
 						printf("to msq %s %ld %s\n", q_msg.msg_from, q_msg.mtype, q_msg.msg_text);
@@ -311,7 +329,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 					strcpy(msg_ack, "msgack;");
 					struct mymsg_buf q_msg;
 					q_msg.mtype = 1;
-					strcpy(q_msg.msg_from, frm_usr->first_name);
+					strcpy(q_msg.msg_from, frm_usr->username);
 					strcpy(q_msg.msg_text, rcvd_msg.msg_text);
 
 					printf("to msq %s %ld %s\n", q_msg.msg_from, q_msg.mtype, q_msg.msg_text);
@@ -395,6 +413,10 @@ int main(){
 	strcpy(u3.last_name, "Bajaj");
 	u3.user_id = 4;
 
+	memset(u1.blocked_id, 0, sizeof(u1.blocked_id));
+	memset(u2.blocked_id, 0, sizeof(u2.blocked_id));
+	memset(u3.blocked_id, 0, sizeof(u3.blocked_id));
+
 	user_ptr ptr = user_arr_begin;
 	*ptr = u1;
 	ptr++;
@@ -474,7 +496,7 @@ int main(){
 					for (int i = 0; i < *registered_users; ++i)
 					{
 						inc_msg.mtype = ptr->user_id;
-						if(!(strcmp(inc_msg.msg_from, ptr->first_name)==0))
+						if(!(strcmp(inc_msg.msg_from, ptr->username)==0))
 							msgsnd(msqid, &inc_msg, sizeof(inc_msg), 0);
 						ptr++;
 					}
