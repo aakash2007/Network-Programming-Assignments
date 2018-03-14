@@ -192,16 +192,16 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 
 		n = recv(conn_sockfd, pbuffer, maxlen, 0);
 		buffer[n] = '\0';
-		printf("%s %ld\n", buffer, strlen(buffer));
+		// printf("%s %ld\n", buffer, strlen(buffer));
 		user_ptr conn_user = verify_user(buffer);
-		printf("Verification:\n");
+		// printf("Verification:\n");
 
 		char ver_usr[15];
 
 		if(conn_user != NULL){		// Verification OK
 
 			strcpy(ver_usr, "verusr;1");
-			printf("%s\n", ver_usr);
+			// printf("%s\n", ver_usr);
 			send(conn_sockfd, ver_usr, strlen(ver_usr), 0);
 			sleep(1);
 
@@ -212,7 +212,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 			strcpy(welcome, "Welcome ");
 			strcat(welcome, conn_user->first_name);
 			strcat(welcome, "!");
-			printf("%s %ld\n", welcome, strlen(welcome));
+			// printf("%s %ld\n", welcome, strlen(welcome));
 			send(conn_sockfd, welcome, strlen(welcome), 0);
 			sleep(0.01);
 
@@ -227,6 +227,14 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 						struct mymsg_buf inc_msg;
 						msgrcv(msqid, &inc_msg, sizeof(inc_msg), conn_user->user_id, 0);
 						printf("lls %s\n", inc_msg.msg_text);
+						char send_msg_str[maxlen];
+						strcpy(send_msg_str, "inc_msg;");
+						strcat(send_msg_str, inc_msg.msg_from);
+						strcat(send_msg_str, ";");
+						strcat(send_msg_str, inc_msg.msg_text);
+						sleep(0.5);
+						printf("send_msg_str %s\n", send_msg_str);
+						send(conn_sockfd, send_msg_str, strlen(send_msg_str), 0);
 					}
 					else{
 						close(conn_sockfd);
@@ -241,13 +249,13 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 				n = recv(conn_sockfd, pbuffer, maxlen, 0);
 				buffer[n] = '\0';
 				oper = atoi(buffer);
-				printf("%d\n", oper);
+				// printf("%d\n", oper);
 				if(oper == 1){
 					n = recv(conn_sockfd, pbuffer, maxlen, 0);
 					buffer[n] = '\0';
 					printf("%s %ld\n", buffer, strlen(buffer));
 					MESSAGE rcvd_msg = decode_msg(buffer);
-					printf("%s %s %s\n", rcvd_msg.msg_from, rcvd_msg.msg_to, rcvd_msg.msg_text);
+					printf("from user %s %s %s\n", rcvd_msg.msg_from, rcvd_msg.msg_to, rcvd_msg.msg_text);
 
 					user_ptr frm_usr = find_user(rcvd_msg.msg_from);
 					user_ptr targ_usr = find_user(rcvd_msg.msg_to);
@@ -260,7 +268,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 						strcpy(q_msg.msg_from, frm_usr->first_name);
 						strcpy(q_msg.msg_text, rcvd_msg.msg_text);
 
-						printf("%s %ld %s\n", q_msg.msg_from, q_msg.mtype, q_msg.msg_text);
+						printf("to msq %s %ld %s\n", q_msg.msg_from, q_msg.mtype, q_msg.msg_text);
 						msgsnd(msqid, &q_msg, sizeof(q_msg), 0);
 						
 						strcat(msg_ack, "1");
@@ -296,16 +304,6 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 			sleep(0.01);
 		}
 	}
-	// else if(ver_usr == 2){		// Password Incorrect
-	// 	strcpy(res, "2");
-	// 	send(conn_sockfd, res, sizeof(res), 0);
-	// }
-	// else if(ver_usr == 0){		// Create New User?
-	// 	strcpy(res, "0");
-	// 	send(conn_sockfd, res, sizeof(res), 0);
-	// 	recv(conn_sockfd, pbuffer, maxlen, 0);
-	// 	create_new_user(buffer);
-	// }
 }
 
 int main(){

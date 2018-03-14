@@ -25,6 +25,12 @@ char* encode_msg(MESSAGE out_msg){
 	return en_msg;
 }
 
+void handle_output(char* inp_str){
+	char tstr[256];
+	strcpy(tstr, inp_str);
+	printf("\n\nssd %s\n\n", tstr);
+}
+
 int main(){
 
 	const char* server_name = "127.0.0.1";
@@ -170,11 +176,11 @@ int main(){
 			if(lis_child == 0){
 				pid_t parent = getppid();
 				while(1){
-					sleep(1);
 					if(kill(parent, 0) == 0){
 						n = recv(sock, pbuffer, maxlen, 0);
 						buffer[n] = '\0';
-						printf("\nchild %s\n", buffer);
+						sleep(1);
+						handle_output(buffer);
 					}
 					else{
 						close(sock);
