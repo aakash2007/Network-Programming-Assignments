@@ -28,7 +28,25 @@ char* encode_msg(MESSAGE out_msg){
 void handle_output(char* inp_str){
 	char tstr[256];
 	strcpy(tstr, inp_str);
-	printf("\n\nssd %s\n\n", tstr);
+	// printf("\n\nssd %s\n\n", tstr);
+	char *pt;
+	pt = strtok(tstr, ";");
+	if(strcmp(pt, "inc_msg") == 0){
+		pt = strtok(NULL, ";");
+		printf("\nMessage from %s: ", pt);
+		pt = strtok(NULL, ";");
+		printf("%s\n", pt);
+	}
+	else if(strcmp(pt, "msgack") == 0){
+		pt = strtok(NULL, ";");
+		int ack = atoi(pt);
+		if(ack == 1){
+			printf("\nMessage Sent\n");
+		}
+		else{
+			printf("No Such User Exists!\n");
+		}
+	}
 }
 
 int main(){
@@ -191,24 +209,26 @@ int main(){
 			}
 
 			while(1){
-
+				sleep(1);
 				int op;
 				do{
 					printf("\nWhat would you like to do?\n");
 					printf("1. Send a Private Message\n");
 					printf("2. Send a Broadcast Message\n");
 					printf("3. Get Status of Other Users\n");
-					printf("4. Exit\n");
+					printf("4. Block a User\n");
+					printf("5. Unblock a User\n");
+					printf("6. Exit\n");
 					printf("Select an option: ");
 
 					scanf("%s", inp);
 					op = atoi(inp);
 
-					if(!(op == 1 || op == 2 || op == 3 || op == 4)){
+					if(!(op == 1 || op == 2 || op == 3 || op == 4 || op == 5 || op == 6)){
 						printf("Incorrect Choice. Please Try Again\n\n");
 					}
 					fflush(stdin);
-				}while(!(op == 1 || op == 2 || op == 3 || op == 4));
+				}while(!(op == 1 || op == 2 || op == 3 || op == 4 || op == 5 || op == 6));
 
 				if(op == 1){
 					
@@ -246,6 +266,21 @@ int main(){
 
 				}
 				else if(op == 4){
+					strcpy(mode, "4");
+					send(sock, mode, strlen(mode), 0);
+					sleep(0.01);
+
+				}
+				else if(op == 5){
+					strcpy(mode, "5");
+					send(sock, mode, strlen(mode), 0);
+					sleep(0.01);
+
+				}
+				else if(op == 6){
+					strcpy(mode, "6");
+					send(sock, mode, strlen(mode), 0);
+					sleep(0.01);
 					printf("\nGoodbye!\n");
 					close(sock);
 					return 0;	

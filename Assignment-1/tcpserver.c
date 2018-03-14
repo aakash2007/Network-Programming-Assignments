@@ -159,6 +159,20 @@ int create_new_user(char* usr_str){
 	return 1;
 }
 
+void update_user_status(){
+	user_ptr ptr = user_arr_begin;
+	for (int i = 0; i < *registered_users; ++i)
+	{
+		if(kill(ptr->child_pid, 0) == 0){
+			ptr->online_status = 1;
+		}
+		else{
+			ptr->online_status = 0;
+		}
+		ptr++;
+	}
+}
+
 void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 	int maxlen = 256;
 	char buffer[maxlen];
@@ -237,6 +251,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 						send(conn_sockfd, send_msg_str, strlen(send_msg_str), 0);
 					}
 					else{
+						conn_user->online_status = 0;
 						close(conn_sockfd);
 						exit(0);
 					}
@@ -287,7 +302,15 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 				else if(oper == 3){
 
 				}
-				else{
+				else if(oper == 4){
+
+				}
+				else if(oper == 5){
+
+				}
+				else if(oper == 6){
+					conn_user->online_status = 0;
+					kill(lis_child, SIGINT);
 					close(conn_sockfd);
 					// kill(lis_child, SIGINT);
 					// wait(NULL);
@@ -391,20 +414,21 @@ int main(){
 
 	// **To test user creation
 
-	// pid_t temp;
-	// temp = fork();
-	// if(temp == 0){
-	// 	while(1){
-	// 		sleep(2);
-	// 		user_ptr ppp = user_arr_begin;
-	// 		for (int i = 0; i < *registered_users; ++i)
-	// 		{
-	// 			printf("KS %ld %s %s %s %s\n", ppp->user_id, ppp->username, ppp->password, ppp->first_name, ppp->last_name);
-	// 			ppp++;
-	// 		}
-	// 		printf("%d \n", *registered_users);
-	// 	}
-	// }
+	pid_t temp;
+	temp = fork();
+	if(temp == 0){
+		while(1){
+			sleep(2);
+			// update_user_status();
+			user_ptr ppp = user_arr_begin;
+			for (int i = 0; i < *registered_users; ++i)
+			{
+				printf("KS %ld %s %s %s %s %d\n", ppp->user_id, ppp->username, ppp->password, ppp->first_name, ppp->last_name, ppp->online_status);
+				ppp++;
+			}
+			printf("%d \n", *registered_users);
+		}
+	}
 
 
 	pid_t child_pid;
