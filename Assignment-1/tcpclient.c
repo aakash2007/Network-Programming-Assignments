@@ -164,17 +164,19 @@ int main(){
 
 			printf("\nMessage from Server: %s\n\n", buffer);
 
-			// pid_t lis_child;
-			// lis_child = fork();
+			pid_t lis_child;
+			lis_child = fork();
 
-			// if(lis_child == 0){
-			// 	while(1){
-			// 		n = recv(sock, pbuffer, maxlen, 0);
-			// 		buffer[n] = '\0';
+			if(lis_child == 0){
+				while(1){
+					sleep(1);
+					n = recv(sock, pbuffer, maxlen, 0);
+					buffer[n] = '\0';
+					printf("\nchild %s\n", buffer);
 
-			// 	}
-			// 	exit(0);
-			// }
+				}
+				exit(0);
+			}
 
 			while(1){
 
@@ -211,35 +213,19 @@ int main(){
 					fgets(snd_msg.msg_text, 100, stdin);
 
 					char *msg_to_send = encode_msg(snd_msg);
-					printf("%s %ld\n", msg_to_send, strlen(msg_to_send));
+					// printf("%s %ld\n", msg_to_send, strlen(msg_to_send));
 					send(sock, msg_to_send, strlen(msg_to_send)-1, 0);
 					sleep(0.01);
 
-					// printf("a\n");
-					// n = recv(sock, pbuffer, maxlen, 0);
-					// buffer[n] = '\0';
-					// printf("d %d\n", n);
-
-					// printf("ack: %s\n", buffer);
-
-					// int msg_ack = atoi(buffer);
-					// if(msg_ack == 1){
-						// printf("\nMessage Sent!\n");
-					// }
-					// else{
-					// 	printf("\nNo Such User.\n");
-					// }
 				}
 				else if(op == 2){
 					strcpy(mode, "2");
 					send(sock, mode, strlen(mode), 0);
 					sleep(0.01);
 
-					printf("a\n");
 					n = recv(sock, pbuffer, maxlen, 0);
 					buffer[n] = '\0';
-					printf("d %d\n", n);
-					
+					printf("%s\n", buffer);					
 				}
 				else if(op == 3){
 					strcpy(mode, "3");
@@ -252,6 +238,7 @@ int main(){
 					close(sock);
 					return 0;	
 				}
+				sleep(1);
 			}
 			return 0;
 

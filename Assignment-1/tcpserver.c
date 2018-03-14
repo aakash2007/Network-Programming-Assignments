@@ -19,14 +19,14 @@ typedef struct my_msg		// For Sending Over Network
 {
 	char msg_from[20];
 	char msg_to[20];
-	char msg_text[020];
+	char msg_text[256];
 } MESSAGE;
 
 struct mymsg_buf	// For Message Queue
 {
 	long mtype;
 	char msg_from[50];
-	char msg_text[200];
+	char msg_text[256];
 };
 
 typedef struct user_det{
@@ -239,16 +239,23 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 					MESSAGE rcvd_msg = decode_msg(buffer);
 					printf("%s %s %s\n", rcvd_msg.msg_from, rcvd_msg.msg_to, rcvd_msg.msg_text);
 
+					user_ptr frm_usr = find_user(rcvd_msg.msg_from);
 					user_ptr targ_usr = find_user(rcvd_msg.msg_to);
 
 					char msg_ack[15];
 					strcpy(msg_ack, "msgack;");
 					if(targ_usr != NULL){
+						struct mymsg_buf q_msg;
+						q_msg.mtype = targ_usr->user_id;
+						strcpy(q_msg.msg_from, frm_usr->first_name);
+						strcpy(q_msg.msg_text, rcvd_msg.msg_text);
+
+						printf("%s %ld %s\n", q_msg.msg_from, q_msg.mtype, q_msg.msg_text);
+						msgsnd(msqid, &q_msg, sizeof(q_msg), 0);
+						
 						strcat(msg_ack, "1");
 						send(conn_sockfd, msg_ack, strlen(msg_ack), 0);
 						sleep(0.01);
-						struct mymsg_buf q_msg;
-						
 					}
 					else{
 						strcat(msg_ack, "2");
