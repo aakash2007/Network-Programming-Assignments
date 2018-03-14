@@ -36,6 +36,7 @@ typedef struct user_det{
 	char last_name[50];
 	char password[50];
 	long user_id;
+	long blocked_id[100];
 	int online_status;
 } USER;
 
@@ -150,7 +151,7 @@ int create_new_user(char* usr_str){
 		ptr++;
 	}
 	(*registered_users)++;
-	int usrid = (*registered_users)*10 + 1;
+	int usrid = (*registered_users)+1;
 	new_usr.user_id = usrid;
 
 	*ptr = new_usr;
@@ -309,7 +310,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 					char msg_ack[15];
 					strcpy(msg_ack, "msgack;");
 					struct mymsg_buf q_msg;
-					q_msg.mtype = 10;
+					q_msg.mtype = 1;
 					strcpy(q_msg.msg_from, frm_usr->first_name);
 					strcpy(q_msg.msg_text, rcvd_msg.msg_text);
 
@@ -375,24 +376,32 @@ int main(){
 
 
 	// dummy users
-	USER u1, u2;
+	USER u1, u2, u3;
 	strcpy(u1.username, "aakash");
 	strcpy(u1.password, "bajaj");
 	strcpy(u1.first_name, "Aakash");
 	strcpy(u1.last_name, "Bajaj");
-	u1.user_id = 100;
+	u1.user_id = 2;
 
 	strcpy(u2.username, "deepak");
 	strcpy(u2.password, "kar");
 	strcpy(u2.first_name, "Deepak");
 	strcpy(u2.last_name, "Kar");
-	u2.user_id = 200;
+	u2.user_id = 3;
+
+	strcpy(u3.username, "abhi");
+	strcpy(u3.password, "abhi");
+	strcpy(u3.first_name, "Abhi");
+	strcpy(u3.last_name, "Bajaj");
+	u3.user_id = 4;
 
 	user_ptr ptr = user_arr_begin;
 	*ptr = u1;
 	ptr++;
 	*ptr = u2;
-	*registered_users = 2;
+	ptr++;
+	*ptr = u3;
+	*registered_users = 3;
 
 
 
@@ -459,7 +468,7 @@ int main(){
 			sleep(1);
 			if(kill(getppid(), 0) == 0){
 					struct mymsg_buf inc_msg;
-					msgrcv(msqid, &inc_msg, sizeof(inc_msg), 10, 0);
+					msgrcv(msqid, &inc_msg, sizeof(inc_msg), 1, 0);
 					// printf("broad %s\n", inc_msg.msg_text);
 					user_ptr ptr = user_arr_begin;
 					for (int i = 0; i < *registered_users; ++i)
