@@ -174,14 +174,14 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 		n = recv(conn_sockfd, pbuffer, maxlen, 0);	
 		buffer[n] = '\0';
 		int scc = create_new_user(buffer);
-		char scc_str[10];
+		char scc_str[20];
 		if(scc == 1){
-			strcpy(scc_str, "1");
+			strcpy(scc_str, "createuser;1");
 			send(conn_sockfd, scc_str, strlen(scc_str), 0);
 			sleep(0.01);
 		}
 		else{
-			strcpy(scc_str, "2");
+			strcpy(scc_str, "createuser;2");
 			send(conn_sockfd, scc_str, strlen(scc_str), 0);
 			sleep(0.01);
 		}
@@ -196,16 +196,17 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 		user_ptr conn_user = verify_user(buffer);
 		printf("Verification:\n");
 
-		char ver_usr[3];
+		char ver_usr[15];
 
 		if(conn_user != NULL){		// Verification OK
-			conn_user->child_pid = getpid();
-			conn_user->online_status = 1;
 
-			strcpy(ver_usr, "1");
+			strcpy(ver_usr, "verusr;1");
+			printf("%s\n", ver_usr);
 			send(conn_sockfd, ver_usr, strlen(ver_usr), 0);
 			sleep(0.01);
-
+			
+			conn_user->child_pid = getpid();
+			conn_user->online_status = 1;
 			// Welcome User
 			char welcome[100];
 			strcpy(welcome, "Welcome ");
@@ -215,15 +216,15 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 			send(conn_sockfd, welcome, strlen(welcome), 0);
 			sleep(0.01);
 
-			pid_t lis_child;
-			lis_child = fork();
+			// pid_t lis_child;
+			// lis_child = fork();
 
-			if(lis_child == 0){			// Child Process to listen to incoming message for client
-				while(1){
-					// MESSAGE inc_msg = msgrcv();
-				}
-				exit(0);
-			}
+			// if(lis_child == 0){			// Child Process to listen to incoming message for client
+			// 	while(1){
+			// 		// MESSAGE inc_msg = msgrcv();
+			// 	}
+			// 	exit(0);
+			// }
 
 			while(1){
 				int oper;
@@ -240,16 +241,17 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 
 					user_ptr targ_usr = find_user(rcvd_msg.msg_to);
 
-					char msg_ack[10];
+					char msg_ack[15];
+					strcpy(msg_ack, "msgack;");
 					if(targ_usr != NULL){
-						strcpy(msg_ack, "1");
+						strcat(msg_ack, "1");
 						send(conn_sockfd, msg_ack, strlen(msg_ack), 0);
-						// sleep(0.01);
+						sleep(0.01);
 						struct mymsg_buf q_msg;
 						
 					}
 					else{
-						strcpy(msg_ack, "2");
+						strcat(msg_ack, "2");
 						send(conn_sockfd, msg_ack, strlen(msg_ack), 0);
 						sleep(0.01);
 					}

@@ -113,7 +113,13 @@ int main(){
 		n = recv(sock, pbuffer, maxlen, 0);
 		buffer[n] = '\0';
 
-		int scc = atoi(buffer);
+		char tstr[20], *pt;
+		strcpy(tstr, buffer);
+		
+		pt = strtok(tstr, ";");
+		pt = strtok(NULL, ";");
+
+		int scc = atoi(pt);
 
 		if(scc == 1){
 			printf("\nUser Successfully Created!\nConnect Again to Login.\n");
@@ -141,10 +147,17 @@ int main(){
 		strcat(data_to_send, password);
 		// printf("%s 	%ld\n", data_to_send, strlen(data_to_send));
 		send(sock, data_to_send, strlen(data_to_send), 0);
+		sleep(0.1);
+		printf("vedd \n" );
 		n = recv(sock, pbuffer, maxlen, 0);
 		buffer[n] = '\0';
+		printf("acddc %s\n", buffer);
 
-		int usr_ver = atoi(buffer);
+		char *pt, tstr[maxlen];
+		strcpy(tstr, buffer);
+		pt = strtok(tstr, ";");
+		pt = strtok(NULL, ";");
+		int usr_ver = atoi(pt);
 		
 		if(usr_ver == 1){
 			n = recv(sock, pbuffer, maxlen, 0);
@@ -222,6 +235,11 @@ int main(){
 					strcpy(mode, "2");
 					send(sock, mode, strlen(mode), 0);
 					sleep(0.01);
+
+					printf("a\n");
+					n = recv(sock, pbuffer, maxlen, 0);
+					buffer[n] = '\0';
+					printf("d %d\n", n);
 					
 				}
 				else if(op == 3){
