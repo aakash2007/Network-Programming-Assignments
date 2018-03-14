@@ -148,11 +148,10 @@ int main(){
 		// printf("%s 	%ld\n", data_to_send, strlen(data_to_send));
 		send(sock, data_to_send, strlen(data_to_send), 0);
 		sleep(0.1);
-		printf("vedd \n" );
 		n = recv(sock, pbuffer, maxlen, 0);
 		buffer[n] = '\0';
-		printf("acddc %s\n", buffer);
 
+		printf("vv00 %s\n", buffer);
 		char *pt, tstr[maxlen];
 		strcpy(tstr, buffer);
 		pt = strtok(tstr, ";");

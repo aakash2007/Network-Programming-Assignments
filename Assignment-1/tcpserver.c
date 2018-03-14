@@ -203,8 +203,8 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 			strcpy(ver_usr, "verusr;1");
 			printf("%s\n", ver_usr);
 			send(conn_sockfd, ver_usr, strlen(ver_usr), 0);
-			sleep(0.01);
-			
+			sleep(1);
+
 			conn_user->child_pid = getpid();
 			conn_user->online_status = 1;
 			// Welcome User
@@ -212,7 +212,7 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 			strcpy(welcome, "Welcome ");
 			strcat(welcome, conn_user->first_name);
 			strcat(welcome, "!");
-			// printf("%s %ld\n", welcome, strlen(welcome));
+			printf("%s %ld\n", welcome, strlen(welcome));
 			send(conn_sockfd, welcome, strlen(welcome), 0);
 			sleep(0.01);
 
