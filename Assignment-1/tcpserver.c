@@ -13,7 +13,7 @@
 #include <sys/signal.h>
 
 int MAX_USERS = 20;
-const int SERVER_PORT = 6789;
+int SERVER_PORT = 6789;
 
 typedef struct my_msg		// For Sending Over Network
 {
@@ -428,13 +428,15 @@ void handle_client(int conn_sockfd, struct sockaddr_in client_addr){
 
 int main(){
 
-	server_start_message();	
+	// server_start_message();	
 
 	// char srv_ip[20];
 	// printf("Input the IP Address of Machine: ");
 	// scanf("%s", srv_ip);
 
 	// Array in Shared Memory for User Details
+	printf("Enter Port No. to Start Chat Server: ");
+	scanf("%d", &SERVER_PORT);
 	const int arr_sz = MAX_USERS*sizeof(USER) + sizeof(int);
 
 	// First 4 bytes to store no. of registered users and rest user_det array
@@ -450,40 +452,39 @@ int main(){
 
 
 	// dummy users
-	USER u1, u2, u3;
-	strcpy(u1.username, "aakash");
-	strcpy(u1.password, "bajaj");
-	strcpy(u1.first_name, "Aakash");
-	strcpy(u1.last_name, "Bajaj");
-	u1.user_id = 2;
+	// USER u1, u2, u3;
+	// strcpy(u1.username, "aakash");
+	// strcpy(u1.password, "bajaj");
+	// strcpy(u1.first_name, "Aakash");
+	// strcpy(u1.last_name, "Bajaj");
+	// u1.user_id = 2;
 
-	strcpy(u2.username, "deepak");
-	strcpy(u2.password, "kar");
-	strcpy(u2.first_name, "Deepak");
-	strcpy(u2.last_name, "Kar");
-	u2.user_id = 3;
+	// strcpy(u2.username, "deepak");
+	// strcpy(u2.password, "kar");
+	// strcpy(u2.first_name, "Deepak");
+	// strcpy(u2.last_name, "Kar");
+	// u2.user_id = 3;
 
-	strcpy(u3.username, "abhi");
-	strcpy(u3.password, "abhi");
-	strcpy(u3.first_name, "Abhi");
-	strcpy(u3.last_name, "Bajaj");
-	u3.user_id = 4;
+	// strcpy(u3.username, "abhi");
+	// strcpy(u3.password, "abhi");
+	// strcpy(u3.first_name, "Abhi");
+	// strcpy(u3.last_name, "Bajaj");
+	// u3.user_id = 4;
 
-	memset(u1.blocked_id, 0, sizeof(u1.blocked_id));
-	memset(u2.blocked_id, 0, sizeof(u2.blocked_id));
-	memset(u3.blocked_id, 0, sizeof(u3.blocked_id));
+	// memset(u1.blocked_id, 0, sizeof(u1.blocked_id));
+	// memset(u2.blocked_id, 0, sizeof(u2.blocked_id));
+	// memset(u3.blocked_id, 0, sizeof(u3.blocked_id));
 
-	u1.blocked_id[3] = 1;
-	u3.blocked_id[2] = 1;
+	// u1.blocked_id[3] = 1;
+	// u3.blocked_id[2] = 1;
 
-	user_ptr ptr = user_arr_begin;
-	*ptr = u1;
-	ptr++;
-	*ptr = u2;
-	ptr++;
-	*ptr = u3;
-	*registered_users = 3;
-
+	// user_ptr ptr = user_arr_begin;
+	// *ptr = u1;
+	// ptr++;
+	// *ptr = u2;
+	// ptr++;
+	// *ptr = u3;
+	// *registered_users = 3;
 
 
 	// Message Queue for IPC
