@@ -319,7 +319,7 @@ int main(){
 					sleep(0.01);
 
 					char bl_usr[20];
-					printf("\n Enter Username to Block: ");
+					printf("\nEnter Username to Block: ");
 					scanf("%s", bl_usr);
 
 					char block_str[maxlen];

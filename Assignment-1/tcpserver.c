@@ -157,6 +157,7 @@ int create_new_user(char* usr_str){
 	strcpy(new_usr.first_name, fname);
 	strcpy(new_usr.last_name, lname);
 	new_usr.online_status = 0;
+	memset(new_usr.blocked_id, 0, sizeof(new_usr.blocked_id));
 
 	// *************semaphore ACCESSING RESOURCE  todo
 	ptr = user_arr_begin;
