@@ -1,4 +1,6 @@
-/*gethostbyname.c*/
+/* AUTHOR: Deepak Kumar Kar (2015A7PS0129P) */
+/* CO-AUTHOR: Aakash Bajaj (2015A2PS0586P) */
+/*dns_client.c*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -129,15 +131,20 @@ int getResponse(unsigned char *domain, unsigned char *dns_server, unsigned char 
 }
 
 int main(int argc, char *argv[]) {
-	if(argc < 3) {
-		printf("Please Enter Domain Name & DNS Server.\n");
+	if(argc < 2) {
+		printf("Please Enter Domain Name.\n");
 		exit(-1);
 	}
+	
 	unsigned char response[MAX_SIZE];
+	char dns_server[MAX_SIZE];
+	if(argc == 3)	strcpy(dns_server, argv[2]);
+	else	strcpy(dns_server, "8.8.8.8");
+
 	int size;
 	for(int i = 0; i < (sizeof(questions)/sizeof(int)); i++) {
 		bzero(response, MAX_SIZE);
-		size = getResponse(argv[1], argv[2], response, questions[i]);
+		size = getResponse(argv[1], dns_server, response, questions[i]);
 		unsigned char *data, dest[MAX_SIZE];
 		bzero(dest, MAX_SIZE);
 		switch(questions[i]) {
@@ -178,12 +185,6 @@ int main(int argc, char *argv[]) {
 				}
 				printf("\n");
 				break;
-			// case T_MX:
-			// 	for(int j = 0; j < size; j++) {
-			// 		printf("%02x ", response[j]);
-			// 		if((j+1)%4 == 0)	printf("\n");
-			// 	} printf("\n");
-			// 	break;
 			case T_AAAA:
 				inet_ntop(AF_INET6, data, dest, MAX_SIZE);
 				printf("%s has AAAA type record of %s\n", argv[1], dest);
