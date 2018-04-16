@@ -73,6 +73,8 @@ int main(int argc, char const *argv[])
   double data_b = data_kb*1024.0;
   double tt = 1024*1024*1024;
 
+  FILE *fl = fopen("output", "w");
+
   pthread_t tid;
   pthread_create(&tid, NULL, senddata, NULL);
 
@@ -95,8 +97,8 @@ int main(int argc, char const *argv[])
     }
     if(n > 0){
       buf[n] = '\0';
-      // fprintf(fl, "%s", buf);
-      // fflush(fl);
+      fprintf(fl, "%s", buf);
+      fflush(fl);
       recv_data += (double)n;
     }
     else if(n == 0){
@@ -113,7 +115,7 @@ int main(int argc, char const *argv[])
     }
   }
   pthread_join(tid, NULL);
-  
+
   double thrg = data_mb/(elapsedTime/1000.0);
   printf("Throughput: %0.5lf MB/s\n", thrg);
 
@@ -121,7 +123,7 @@ int main(int argc, char const *argv[])
   res_time = elapsedTime/(data_b/256);
   printf("Response Time Per Request: %lf ms.\n", res_time);
     
-  // fclose(fl);
+  fclose(fl);
   close(sock);    
   return 0;
 }

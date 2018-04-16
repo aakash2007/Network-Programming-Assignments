@@ -65,7 +65,7 @@ int main(int argc, char const *argv[])
     exit(0);
   }
   else{
-    // FILE *fl = fopen("output", "w");
+    FILE *fl = fopen("output", "w");
     int n;
     char buf[1024];
     double recv_data = 0.0;
@@ -85,8 +85,8 @@ int main(int argc, char const *argv[])
       }
       if(n > 0){
         buf[n] = '\0';
-        // fprintf(fl, "%s", buf);
-        // fflush(fl);
+        fprintf(fl, "%s", buf);
+        fflush(fl);
         recv_data += (double)n;
       }
       else if(n == 0){
@@ -111,7 +111,7 @@ int main(int argc, char const *argv[])
     printf("Response Time Per Request: %lf ms.\n", res_time);
 
     
-    // fclose(fl);
+    fclose(fl);
     close(sock);    
     wait(NULL);
   }
