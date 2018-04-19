@@ -211,41 +211,7 @@ int main(int argc, char const *argv[])
 	res_time = elapsedTime/(data_b/256);
 	printf("Response Time Per Request: %lf ms.\n", res_time);
 
-	//   // if(flag == 0){
-	//   //   gettimeofday(&t1, NULL);
-	//   //   flag = 1;
-	//   // }
-	//   if(n > 0){
-	// 	buf[n] = '\0';
-	// 	// fprintf(fl, "%s", buf);
-	// 	// fflush(fl);
-	// 	// recv_data += (double)n;
-	//   }
-	//   else if(n == 0){
-	// 	// gettimeofday(&t2, NULL);
-	// 	// elapsedTime = (t2.tv_sec - t1.tv_sec)*1000.0;
-	// 	// elapsedTime += (t2.tv_usec - t1.tv_usec)/1000.0;
-	// 	// printf("\nTotal time : %0.3f ms.\n", elapsedTime);      
-
-	// 	close(sock);
-	// 	break;
-	//   }
-	//   else{
-	// 	exit(1);
-	//   }
-	//   printf("%d== %s\n", n, buf);
-	// }
-
-	// double thrg = data_mb/(elapsedTime/1000.0);
-	// printf("Throughput: %0.5lf MB/s\n", thrg);
-
-	// double res_time;
-	// res_time = elapsedTime/(data_b/256);
-	// printf("Response Time Per Request: %lf ms.\n", res_time);
-
-	
-	// fclose(fl);
-	close(sock);
+	fclose(fl);
 	close(par_sock);
 
   return 0;
