@@ -45,7 +45,7 @@ int main(int argc, char const *argv[])
 	int cli_addr_len = 0;
 	int conn_fd;
 
-	double data_gb = 0.1;
+	double data_gb = 1.0;
 	double data_mb = data_gb*1024.0;
 	double data_kb = data_mb*1024.0;
 	double data_b = data_kb*1024.0;

@@ -112,7 +112,7 @@ int main(int argc, char const *argv[])
 
 	double data_gb;
 	sscanf(pt, "%lf", &data_gb);
-	printf("data: %lf\n", data_gb);
+	printf("data: %lf GB\n", data_gb);
   
 	FILE *fl = fopen("download", "w");
 	int maxsock=0;
